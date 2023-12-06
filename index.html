@@ -1,26 +1,23 @@
-<div class="mb-3">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" name="password" id="password" required>
-                <div class="invalid-feedback">
-                    Please enter a password.
-                </div>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Redirect to Google</title>
+</head>
+<body>
 
-            <div class="mb-3">
-                <label for="repeat_password">Repeat Password</label>
-                <input type="password" class="form-control" name="repeat_password" id="repeat_password" required>
-                <script>
-                    form = document.getElementById("registration-info");
-                    form.onclick = function() {
-                        var password = document.getElementById("password");
-                        var repeat_password = document.getElementById("repeat_password");
+  <input type="text" id="textInput" placeholder="Enter 'helloworld'">
+  <button onclick="redirect()">Submit</button>
 
-                        if(password.value != repeat_password.value) {
-                            repeat_password.setCustomValidity("Passwords Don't Match");
-                        } else {
-                            repeat_password.setCustomValidity('');
-                        }
-                    }
-                </script>
+  <script>
+    function redirect() {
+      var inputText = document.getElementById("textInput").value;
+      if (inputText === "helloworld") {
+        window.location.href = "https://www.google.com";
+      } else {
+        alert("Please enter 'helloworld'");
+      }
+    }
+  </script>
 
-            </div>
+</body>
+</html>
