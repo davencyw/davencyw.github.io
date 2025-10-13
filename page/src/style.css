@@ -146,7 +146,9 @@ footer-left {
 
 #name {
     color: #fff;
-    font-size: 3rem;
+    font-size: 8vw;
+    text-align: center;
+    margin: 0;
     animation: fadeInOut 4s infinite;
 }
 
