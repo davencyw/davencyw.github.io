@@ -17,23 +17,28 @@ document.getElementById('toggle-more').addEventListener('click', function(event)
   event.preventDefault(); // Prevent default anchor behavior
 
   var extraInfo = document.getElementById('extra-info');
-  var toggleButton = document.getElementById('toggle-more');
+  var title = document.getElementById('title');
+  var projects = document.getElementById('projects');
 
   if (extraInfo.style.display === 'none') {
       extraInfo.style.display = 'block';
-      toggleButton.textContent = '[hide]';
+      title.style.display = 'none';
+      projects.style.display = 'none';
   } else {
       extraInfo.style.display = 'none';
-      toggleButton.textContent = '[more]';
+      title.style.display = 'block';
+      projects.style.display = 'block';
   }
 });
 
 document.getElementById('close-extra-info').addEventListener('click', function() {
   var extraInfo = document.getElementById('extra-info');
-  var toggleButton = document.getElementById('toggle-more');
+  var title = document.getElementById('title');
+  var projects = document.getElementById('projects');
 
   extraInfo.style.display = 'none';
-  toggleButton.textContent = '[more]'; // Reset the toggle button to 'more'
+  title.style.display = 'block';
+  projects.style.display = 'block';
 });
 
 document.addEventListener("mousemove", (event) => {
