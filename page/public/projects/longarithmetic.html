@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Performance Long Arithmetic on GPUs</title>
+    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- syntax highlighting -->
+    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-python.min.js"></script>
+
+    <style>
+        #dark-mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 15px;
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .banner {
+            background-color: #fff8dc;
+            color: #000;
+            padding: 10px 20px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .full-width-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            background-color: #fff8dc;
+            color: #000;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #ffd700;
+            z-index: 1000;
+        }
+
+        body:has(.full-width-banner) header {
+            margin-top: 60px;
+        }
+
+        body:has(.full-width-banner) #dark-mode-toggle {
+            margin-top: 60px;
+        }
+    </style>
+</head>
+
+
+
+<body class="latex-light">
+    <div class="full-width-banner">
+        This article is a <i>Work in Progress</i>. Content may be incomplete or subject to change.
+    </div>
+
+
+    <button id="dark-mode-toggle">Dark Mode</button>
+    <script>
+        const toggleButton = document.querySelector("#dark-mode-toggle");
+        toggleButton
+            .addEventListener('click', () => {
+                document.body.classList.toggle("latex-dark");
+                console.log(toggleButton.textContent);
+                if (toggleButton.textContent == "Light Mode") {
+                    toggleButton.textContent = "Dark Mode";
+                    toggleButton.style.backgroundColor = "#e0e0e0"; // Light background
+                    toggleButton.style.color = "#333"; // Dark text
+                } else {
+                    toggleButton.textContent = "Light Mode";
+                    toggleButton.style.backgroundColor = "#565656"; // Dark background
+                    toggleButton.style.color = "white"; // Light text
+                }
+            });
+    </script>
+
+    <header>
+        <h1>High Performance Long Arithmetic on GPUs</h1>
+    </header>
+
+
+    <p class="author">David Schmidig <br> November, 2025</p>
+
+    <div class="abstract">
+        <h2>Abstract</h2>
+        <p>
+            TODO(dave):
+        </p><br>
+    </div>
+
+
+    <main>
+
+        <article>
+            <!-- <figure>
+                <img src="/davencyw.net/projects/paperviewer/system_overview_diagram.png">
+                <figcaption>Overview of the whole system</figcaption>
+            </figure> -->
+
+            <h2>1. Motivation</h2>
+            <p>
+            <h2>2. Approach</h2>
+       
+            </p>
+
+            </div>
+        </article>
+        <!-- <article>
+            <h2>Appendix A</h2>
+        </article> -->
+    </main>
+</body>
