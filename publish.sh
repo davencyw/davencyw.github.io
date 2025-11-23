@@ -24,7 +24,7 @@ echo -e "${BLUE}🌐 Deploying to GitHub Pages...${NC}"
 # Deploy to GitHub Pages
 if npm run deploy; then
     echo -e "${GREEN}✅ Deployment successful!${NC}"
-    echo -e "${GREEN}🎉 Your website is now live at: https://davencyw.github.io/davencyw.net/${NC}"
+    echo -e "${GREEN}🎉 Your website is now live at: https://davencyw.github.io${NC}"
 else
     echo -e "${RED}❌ Deployment failed!${NC}"
     exit 1
