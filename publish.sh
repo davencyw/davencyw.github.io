@@ -20,6 +20,10 @@ else
     exit 1
 fi
 
+echo -e "${BLUE}📄 Copying CNAME file...${NC}"
+# Copy CNAME to dist directory
+cp ../CNAME dist/CNAME
+
 echo -e "${BLUE}🌐 Deploying to GitHub Pages...${NC}"
 # Deploy to GitHub Pages
 if npm run deploy; then
