@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUDA Memory Coalescing Patterns</title>
+    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-c.min.js"></script>
+
+    <style>
+        #dark-mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 15px;
+            background-color: #565656;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background-color: rgba(100, 100, 100, 0.3);
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .tags {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body class="latex-dark">
+    <button id="dark-mode-toggle">Light Mode</button>
+    <script>
+        const toggleButton = document.querySelector("#dark-mode-toggle");
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle("latex-dark");
+            if (toggleButton.textContent == "Light Mode") {
+                toggleButton.textContent = "Dark Mode";
+                toggleButton.style.backgroundColor = "#e0e0e0";
+                toggleButton.style.color = "#333";
+            } else {
+                toggleButton.textContent = "Light Mode";
+                toggleButton.style.backgroundColor = "#565656";
+                toggleButton.style.color = "white";
+            }
+        });
+    </script>
+
+    <header>
+        <h1>CUDA Memory Coalescing Patterns</h1>
+        <p class="author">Technical Log</p>
+        <div class="tags">
+            <span class="tag">CUDA</span>
+            <span class="tag">Performance</span>
+            <span class="tag">GPU</span>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <h2>Overview</h2>
+            <p>
+                Memory coalescing is one of the most critical optimization techniques for achieving high throughput 
+                on NVIDIA GPUs. When threads in a warp access consecutive memory addresses, the hardware can 
+                combine these accesses into fewer memory transactions, dramatically improving bandwidth utilization.
+            </p>
+
+            <h2>The Problem</h2>
+            <p>
+                Global memory on GPUs has high latency (~400-800 cycles) and limited bandwidth. Without proper 
+                access patterns, a kernel can become memory-bound, achieving only a fraction of the theoretical 
+                peak performance.
+            </p>
+
+            <h2>Coalesced vs Non-Coalesced Access</h2>
+            <p>
+                Consider a simple example where each thread accesses an element from an array:
+            </p>
+
+            <pre><code class="language-c">// Coalesced access - threads access consecutive elements
+__global__ void coalesced(float* data, float* out, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        out[idx] = data[idx] * 2.0f;
+    }
+}
+
+// Non-coalesced access - strided pattern
+__global__ void strided(float* data, float* out, int n, int stride) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int strided_idx = idx * stride;
+    if (strided_idx < n) {
+        out[idx] = data[strided_idx] * 2.0f;
+    }
+}</code></pre>
+
+            <h2>Memory Transaction Rules</h2>
+            <p>
+                For compute capability 6.0+, global memory transactions are 32 bytes. A warp of 32 threads 
+                accessing consecutive 4-byte floats results in a single 128-byte transaction (4 x 32-byte segments).
+            </p>
+
+            <ul>
+                <li>Aligned, consecutive access: 1 transaction per 32 threads</li>
+                <li>Misaligned access: up to 2 transactions per 32 threads</li>
+                <li>Strided access: up to 32 transactions per 32 threads (worst case)</li>
+            </ul>
+
+            <h2>Practical Guidelines</h2>
+            <ol>
+                <li>Structure data for consecutive thread access patterns</li>
+                <li>Use Structure of Arrays (SoA) instead of Array of Structures (AoS)</li>
+                <li>Align data structures to 128-byte boundaries when possible</li>
+                <li>Consider shared memory for irregular access patterns</li>
+                <li>Profile with <code>nsight compute</code> to measure actual memory efficiency</li>
+            </ol>
+
+            <h2>Measuring Coalescing Efficiency</h2>
+            <p>
+                Use NVIDIA Nsight Compute to measure the <code>gld_efficiency</code> and <code>gst_efficiency</code> 
+                metrics. Values close to 100% indicate well-coalesced access patterns.
+            </p>
+
+        </article>
+    </main>
+</body>
+
+</html>

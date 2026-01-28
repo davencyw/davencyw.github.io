@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>David Schmidig</title>
+    <title>David Blum</title>
     <link rel="stylesheet" href="src/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -20,50 +20,80 @@
             <div class="container">
                 <footer>
                     <p>Reach out to me on <a href="https://www.linkedin.com/in/davencyw/">LinkedIn</a> or send me
-                        an <a href="mailto:david@schmidig.net">email</a>.</p>
+                        an <a href="mailto:david@Blum.net">email</a>.</p>
                 </footer>
                 <!-- <footer-left>
                     <p><a href="about.html">About</a></p>
                 </footer-left> -->
                 <canvas id="threejs-background"></canvas>
+                <script>
+                    // Immediately set background opacity if splash was already seen (prevents flash)
+                    if (sessionStorage.getItem('hasSeenSplash')) {
+                        document.getElementById('threejs-background').style.opacity = 0.1;
+                        document.getElementById('threejs-background').classList.add('below-content');
+                    }
+                </script>
                 <div class="inner-box">
                     <div id="title">
                         <h1>David Blum</h1>
-                        <h2 id="subtitle">AI / CUDA Engineer</h2>
+                        <h2 id="subtitle">ML / CUDA Engineer</h2>
                         </br>
                         <p><a href=" #" id="toggle-more">[about]</a></p>
                         </br>
                         </br>
                         </br>
                     </div>
-                    <div id="projects">
-                        <h2 id="subtitle"> Public Projects:</h2>
-                        
-                        <div class="year-section">
-                            <h3 id="subtitle" class="year-header" data-year="2025">
-                                <span class="year-toggle">2025</span>
-                                <!-- <span class="collapse-arrow">▼</span> -->
-                            </h3>
-                            <ul class="year-projects">
-                                <!-- <li>
-                                    <a href="#">
-                                        <div class="project-title">Accelerate ZK Cryptography with CUDA</div>
-                                        <div class="project-subtitle">A dive into the technicalities of GPU-Accelerated Cryptography with all its intricacies.</br> Coming soon...</div>
-                                    </a>
-                                </li> -->
-                                <!-- <li>
-                                    <a href="projects/longarithmetic.html">
-                                        <div class="project-title">High Performance Long Arithmetic on GPUs</div>
-                                        <div class="project-subtitle">A technical case study on accelerating long arithmetic operations (>256 bits) on GPUs.</br> Coming soon...</div>
-                                    </a>
-                                </li> -->
-                                <li>
-                                    <a href="projects/paperviewer.html">
-                                        <div class="project-title">Cutting Through the Noise</div>
-                                        <div class="project-subtitle">Automated AI Paper Curation with Language Models and RLHF</div>
-                                    </a>
-                                </li>
-                            </ul>
+                    <div id="content-sections">
+                        <!-- Projects Section -->
+                        <div id="projects-section" class="content-row">
+                            <div class="section-header">
+                                <h2>Projects</h2>
+                                <a href="projects.html" class="view-all-link">view all</a>
+                            </div>
+                            <div class="projects-grid">
+                                <a href="projects/paperviewer.html" class="project-card">
+                                    <div class="project-image">
+                                        <img src="projects/paperviewer/preview.png" alt="Paper Viewer">
+                                    </div>
+                                    <div class="project-card-title">Cutting Through the Noise</div>
+                                </a>
+                                <!-- Additional project cards (max 3) -->
+                                <!--
+                                <a href="#" class="project-card">
+                                    <div class="project-image">
+                                        <img src="projects/example/preview.png" alt="Project Title">
+                                    </div>
+                                    <div class="project-card-title">Project Title</div>
+                                </a>
+                                -->
+                            </div>
+                        </div>
+
+                        <!-- Technical Logs Section -->
+                        <div id="logs-section" class="content-row">
+                            <div class="section-header">
+                                <h2>Technical Logs</h2>
+                                <a href="logs.html" class="view-all-link">archive</a>
+                            </div>
+                            <div class="logs-grid">
+                                <a href="logs/cuda-memory-coalescing.html" class="log-entry">
+                                    <div class="log-title">CUDA Memory Coalescing Patterns</div>
+                                    <div class="log-description">Analyzing memory access patterns for optimal GPU throughput.</div>
+                                    <div class="log-tags">
+                                        <span class="tag">CUDA</span>
+                                        <span class="tag">GPU</span>
+                                    </div>
+                                </a>
+                                <a href="logs/efficient-attention.html" class="log-entry">
+                                    <div class="log-title">Efficient Attention Mechanisms</div>
+                                    <div class="log-description">Notes on FlashAttention and memory-efficient transformers.</div>
+                                    <div class="log-tags">
+                                        <span class="tag">ML</span>
+                                        <span class="tag">Transformers</span>
+                                    </div>
+                                </a>
+                                <!-- Add up to 2 more log entries here for max 4 total -->
+                            </div>
                         </div>
                     </div>
 
