@@ -1,9 +1,15 @@
 window.onload = function() {
-  var hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
-  var loadingScreen = document.getElementById('loading-screen');
+  // var hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+  // var loadingScreen = document.getElementById('loading-screen');
   var mainContent = document.getElementById('main-content');
   var background = document.getElementById('threejs-background');
 
+  // Splash screen disabled - show main content immediately
+  mainContent.style.display = 'block';
+  background.style.opacity = 0.1;
+  background.classList.add('below-content');
+
+  /* Splash screen logic - uncomment to re-enable
   if (hasSeenSplash) {
     // Skip splash screen on return visits - show immediately at final opacity
     loadingScreen.style.display = 'none';
@@ -24,6 +30,7 @@ window.onload = function() {
       }, 2000);
     }, 2000);
   }
+  */
 
   var extraInfo = document.getElementById('extra-info');
   extraInfo.style.display = 'none';
@@ -35,15 +42,18 @@ document.getElementById('toggle-more').addEventListener('click', function(event)
   var extraInfo = document.getElementById('extra-info');
   var title = document.getElementById('title');
   var contentSections = document.getElementById('content-sections');
+  var scrollIndicator = document.querySelector('.scroll-indicator');
 
   if (extraInfo.style.display === 'none') {
       extraInfo.style.display = 'block';
       title.style.display = 'none';
       contentSections.style.display = 'none';
+      scrollIndicator.style.display = 'none';
   } else {
       extraInfo.style.display = 'none';
       title.style.display = 'block';
       contentSections.style.display = 'block';
+      scrollIndicator.style.display = 'block';
   }
 });
 
@@ -51,10 +61,12 @@ document.getElementById('close-extra-info').addEventListener('click', function()
   var extraInfo = document.getElementById('extra-info');
   var title = document.getElementById('title');
   var contentSections = document.getElementById('content-sections');
+  var scrollIndicator = document.querySelector('.scroll-indicator');
 
   extraInfo.style.display = 'none';
   title.style.display = 'block';
   contentSections.style.display = 'block';
+  scrollIndicator.style.display = 'block';
 });
 
 document.addEventListener("mousemove", (event) => {
