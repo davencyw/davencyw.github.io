@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Is Cheap Now. Engineering Isn't.</title>
+    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
+    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
+
+    <style>
+        #dark-mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 15px;
+            background-color: #565656;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background-color: rgba(100, 100, 100, 0.3);
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .tags {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body class="latex-dark">
+    <button id="dark-mode-toggle">Light Mode</button>
+    <script>
+        const toggleButton = document.querySelector("#dark-mode-toggle");
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle("latex-dark");
+            if (toggleButton.textContent == "Light Mode") {
+                toggleButton.textContent = "Dark Mode";
+                toggleButton.style.backgroundColor = "#e0e0e0";
+                toggleButton.style.color = "#333";
+            } else {
+                toggleButton.textContent = "Light Mode";
+                toggleButton.style.backgroundColor = "#565656";
+                toggleButton.style.color = "white";
+            }
+        });
+    </script>
+
+    <header>
+        <h1>Code Is Cheap Now. Engineering Isn't.</h1>
+        <p class="author">Technical Log - February 2026</p>
+        <div class="tags">
+            <span class="tag">Development</span>
+            <span class="tag">Tools</span>
+            <span class="tag">AI</span>
+        </div>
+    </header>
+
+    <div class="abstract">
+        <h2>Summary</h2>
+        <p>
+            AI has erased most of the grind of writing code, but that doesn't make software easy or free. 
+            This post looks at how AI changes day-to-day development: from collapsing the loop between idea 
+            and working prototype to turning migrations and refactors into background tasks. It also argues 
+            that while code is now a disposable asset, the hard problems (architecture, integration, data modeling, 
+            security, and picking the right things to build) remain as critical as ever. The real leverage for 
+            teams comes from treating AI as an execution amplifier while they double down on judgment, system 
+            design, and fast, safe learning cycles.
+        </p>
+    </div>
+
+    <main>
+        <article>
+            <h2>Code stopped being the bottleneck</h2>
+            <p>
+                For most of my career, the slow part of building software was writing it. You had to carve out 
+                big, uninterrupted blocks of time just to grind through implementation details, and every new 
+                feature felt like a small marathon. Today, with competent AI assistants, a lot of that grind 
+                has evaporated. You can outline a service, paste in a few interfaces, ask for tests, and have 
+                a working first cut in the time it used to take to argue about estimates. That doesn't make 
+                engineering trivial, but it does mean that "who can type the fastest" is no longer the thing 
+                that separates great teams from average ones.
+            </p>
+
+            <h2>That speed changes how we should build</h2>
+            <p>
+                If code is cheap, the real constraint is how fast we can move from "vague idea" to "running 
+                thing we trust." The best use of AI isn't sprinkling autocomplete on top of the same old process; 
+                it's collapsing the loop between intent, implementation, and feedback. Small, well-scoped changes 
+                become trivial when you can generate the boring parts on demand. Migrations and refactors that 
+                would've eaten a sprint can be turned into structured prompts and mostly handled by the assistant. 
+                The teams that benefit most are the ones willing to shorten planning cycles, ship smaller increments, 
+                and treat the first implementation as something to learn from rather than something to defend.
+            </p>
+
+            <h2>New development workflow when code is cheap</h2>
+            <p>
+                In an AI-first workflow, I spend more time describing what we're trying to achieve and less time 
+                worrying about the mechanics of getting there. I'll sketch the behavior, constraints, and edge cases, 
+                then let the assistant scaffold the module, tests, and sometimes even the documentation. From there, 
+                the work is a sequence of tight iterations: run it, inspect the output, adjust the spec, regenerate. 
+                We lean into smaller, composable changes that the AI can handle end-to-end, and we're comfortable 
+                throwing away generated code when the design evolves. Velocity comes less from typing faster and 
+                more from eliminating handoffs, coordination overhead, and time lost waiting for someone to "get 
+                around" to the boring parts.
+            </p>
+
+            <h2>Why software is still expensive</h2>
+            <p>
+                None of this means software itself is cheap. Integration is still hard. Good data modeling is still 
+                hard. Picking the right boundaries between services, thinking through failure modes, and making 
+                trade-offs around performance, security, and operability are as demanding as ever. AI can happily 
+                generate three different implementations of the wrong abstraction, all of them plausible on the 
+                surface. The real cost sits in the accumulation of decisions: where responsibility lives, how 
+                systems talk, which use cases you prioritize, and how you handle the ugly edge cases. It's entirely 
+                possible to move faster and still end up with a mess that's costly to maintain if you don't stay 
+                intentional.
+            </p>
+
+            <h2>Practical ways to trade cheap code for real speed</h2>
+            <p>
+                In practice, the teams I see getting real leverage out of AI treat it as a way to remove friction, 
+                not as a magic wand. They bias toward narrow, well-defined changes that can be automated cleanly. 
+                They invest in tests, CI, and clear interfaces so they can safely accept more AI-generated diffs 
+                without endless bikeshedding. They use assistants to handle migrations, bulk edits, and glue code 
+                that would usually soak up senior attention. Most importantly, they redesign their process around 
+                shorter feedback loops: smaller PRs, more frequent deploys, and quicker validation with users. 
+                Speed became a property of the whole system you build around it.
+            </p>
+
+            <h2>If code is cheap, what's the moat?</h2>
+            <p>
+                When anyone with basic skills can ask an AI to rebuild a whole webbrowser in a weekend, "I wrote a lot 
+                of code" stops being a convincing moat. The durable advantages shift elsewhere: deep domain 
+                understanding, proprietary data, distribution, trust, and tight integration into real workflows. 
+                Judgment becomes a moat too: the ability to say "no" to most feature ideas, to pick the right 
+                level of abstraction, and to recognize when a problem is better solved with process than with 
+                more software. In that world, speed still matters, but it's the speed of learning and adaptation, 
+                not the speed of feature cloning. The winners will be the teams that can turn insight into 
+                improved behavior quickly and repeatedly.
+            </p>
+
+            <h2>What it means for developers, in my opinion</h2>
+            <p>
+                It helps to think of code as a disposable asset. The thing 
+                you're really optimizing is the loop: observe, decide, change, observe again. Let the AI handle 
+                as much of the mechanical work as possible so your people can focus on architecture, clarity of 
+                intent, and the conversations that decide what is worth building at all. Encourage 
+                to practice describing problems precisely and reviewing AI output critically. Push for more 
+                automation in testing and deployment so the increased volume of changes doesn't overwhelm. 
+                And when prioritizing work, remember that features are cheap now; the hard part is building 
+                something that stays coherent and valuable as it evolves.
+            </p>
+        </article>
+    </main>
+</body>
+
+</html>

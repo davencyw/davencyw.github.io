@@ -4,135 +4,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>David Schmidig</title>
+    <title>David Blum</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-DSKmkAk2.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DbpFPm3L.css">
+  <script type="module" crossorigin src="/assets/index-cyAhQlk5.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CmF8WIxL.css">
 </head>
 
 <body>
     <div class="custom-cursor"></div>
-    <div id="loading-screen">
+    <!-- <div id="loading-screen">
         <h1 id="name">David Blum</h1>
-    </div>
+    </div> -->
 
     <div id="main-content">
         <div class="outer-container">
             <div class="container">
                 <footer>
                     <p>Reach out to me on <a href="https://www.linkedin.com/in/davencyw/">LinkedIn</a> or send me
-                        an <a href="mailto:david@schmidig.net">email</a>.</p>
+                        an <a href="mailto:david@Blum.net">email</a>.</p>
                 </footer>
                 <!-- <footer-left>
                     <p><a href="about.html">About</a></p>
                 </footer-left> -->
                 <canvas id="threejs-background"></canvas>
+                <script>
+                    // Immediately set background opacity if splash was already seen (prevents flash)
+                    if (sessionStorage.getItem('hasSeenSplash')) {
+                        document.getElementById('threejs-background').style.opacity = 0.1;
+                        document.getElementById('threejs-background').classList.add('below-content');
+                    }
+                </script>
                 <div class="inner-box">
-                    <div id="title">
-                        <h1>David Blum</h1>
-                        <h2 id="subtitle">AI / CUDA Engineer</h2>
-                        </br>
-                        <p><a href=" #" id="toggle-more">[about]</a></p>
-                        </br>
-                        </br>
-                        </br>
+                    <div id="hero-section">
+                        <div id="title">
+                            <h1>David Blum</h1>
+                            <h2 id="subtitle">ML / CUDA Engineer</h2>
+                            </br>
+                            <p><a href=" #" id="toggle-more">[about]</a></p>
+                        </div>
+                        <div id="extra-info" class="extra-info">
+                            <button id="close-extra-info" class="close-btn">[x]</button>
+                            <h2>About Me</h2> </br>
+                            <p>
+                                I am a Senior AI/ML and CUDA Engineer with a deep passion for creating cutting-edge solutions in
+                                computer vision, real-time AI systems, and scalable deep learning applications. With a
+                                strong foundation in advanced algorithm design and optimization, I have honed my
+                                expertise
+                                in bridging state-of-the-art research with practical, production-ready systems. My
+                                career is
+                                defined by a drive to solve complex challenges while fostering innovation and
+                                collaboration
+                                within diverse teams.
+                            </p>
+                            <br>
+                            <br>
+                            <p>
+                                Over the years, I have successfully led cross-functional teams, guiding the development of
+                                sub-second human skeletal pose tracking systems, multi-modal human skeleton pose
+                                optimization, and
+                                action recognition pipelines. These projects required not only strong technical expertise
+                                but also a meticulous focus on building scalable, maintainable, and high-performance
+                                software. I take pride in delivering robust solutions that integrate seamlessly into
+                                production environments, ensuring reliability, efficiency, and long-term value.
+                            </p>
+                            <br>
+                            <br>
+                            <p>
+                                With over 10 years of experience in C++ and Python, I am proficient in a wide range of
+                                tools
+                                and libraries, including high-performance computing frameworks (OpenMP, BLAS, Eigen,
+                                Ceres,
+                                Boost, TBB), GPGPU programming (CUDA, CuDNN), and deep learning frameworks (PyTorch,
+                                OpenCV,
+                                numpy, pandas, matplotlib/seaborn, scipy). My expertise extends to orchestration tools
+                                such
+                                as Union/Flyte and MLflow, which I leverage to streamline development, enable
+                                reproducibility, and ensure scalability in AI workflows.
+                            </p>
+                            <br>
+                            <br>
+                            <br>
+                            <h2>My Motivation</h2> </br>
+                            <p>
+                                At the core of my work is a passion for transforming state-of-the-art research into
+                                tangible, high-quality products. I am inspired by the process of unraveling complex
+                                problems
+                                and translating innovative ideas into systems that deliver measurable impact. My
+                                ultimate
+                                goal is to bridge the gap between academic excellence and industrial applicability,
+                                ensuring
+                                that the solutions I help create are both cutting-edge and practical.
+                            </p>
+                        </div>
+                        <div class="scroll-indicator" onclick="document.getElementById('content-sections').scrollIntoView({behavior: 'smooth'})">
+                            <span class="scroll-arrow"></span>
+                        </div>
                     </div>
-                    <div id="projects">
-                        <h2 id="subtitle"> Public Projects:</h2>
-                        
-                        <div class="year-section">
-                            <h3 id="subtitle" class="year-header" data-year="2025">
-                                <span class="year-toggle">2025</span>
-                                <!-- <span class="collapse-arrow">▼</span> -->
-                            </h3>
-                            <ul class="year-projects">
-                                <!-- <li>
-                                    <a href="#">
-                                        <div class="project-title">Accelerate ZK Cryptography with CUDA</div>
-                                        <div class="project-subtitle">A dive into the technicalities of GPU-Accelerated Cryptography with all its intricacies.</br> Coming soon...</div>
-                                    </a>
-                                </li> -->
-                                <!-- <li>
-                                    <a href="projects/longarithmetic.html">
-                                        <div class="project-title">High Performance Long Arithmetic on GPUs</div>
-                                        <div class="project-subtitle">A technical case study on accelerating long arithmetic operations (>256 bits) on GPUs.</br> Coming soon...</div>
-                                    </a>
-                                </li> -->
-                                <li>
-                                    <a href="projects/paperviewer.html">
-                                        <div class="project-title">Cutting Through the Noise</div>
-                                        <div class="project-subtitle">Automated AI Paper Curation with Language Models and RLHF</div>
-                                    </a>
-                                </li>
-                            </ul>
+                    <div id="content-sections">
+                        <!-- Projects Section -->
+                        <div id="projects-section" class="content-row">
+                            <div class="section-header">
+                                <h2>Projects</h2>
+                                <a href="projects.html" class="view-all-link">view all</a>
+                            </div>
+                            <div class="projects-grid">
+                                <a href="projects/paperviewer.html" class="project-card">
+                                    <div class="project-image">
+                                        <img src="projects/paperviewer/preview.png" alt="Paper Viewer">
+                                    </div>
+                                    <div class="project-card-info">
+                                        <span class="project-card-date">Jan 2025</span>
+                                        <span class="project-card-title">Cutting Through the Noise</span>
+                                    </div>
+                                </a>
+                                <!-- Additional project cards (max 3) -->
+                                <!--
+                                <a href="#" class="project-card">
+                                    <div class="project-image">
+                                        <img src="projects/example/preview.png" alt="Project Title">
+                                    </div>
+                                    <div class="project-card-title">Project Title</div>
+                                </a>
+                                -->
+                            </div>
+                        </div>
+
+                        <!-- Technical Logs Section -->
+                        <div id="logs-section" class="content-row">
+                            <div class="section-header">
+                                <h2>Technical Logs</h2>
+                                <a href="logs.html" class="view-all-link">archive</a>
+                            </div>
+                            <div class="logs-grid">
+                                <a href="logs/code-is-cheap.html" class="log-entry">
+                                    <div class="log-date">Feb 2026</div>
+                                    <div class="log-title">Code Is Cheap Now. Engineering Isn't.</div>
+                                    <div class="log-description">A short reflection on how AI has made code generation trivial, shifting the real work to architecture, judgment, and building reliable systems.</div>
+                                    <div class="log-tags">
+                                        <span class="tag">Development</span>
+                                        <span class="tag">Tools</span>
+                                        <span class="tag">AI</span>
+                                    </div>
+                                </a>
+                               
+                                <!-- Add more log entries here for max 4 total -->
+                            </div>
                         </div>
                     </div>
 
-                    <div id="extra-info" class="extra-info">
-                        <button id="close-extra-info" class="close-btn">[x]</button>
-                        <h2>About Me</h2> </br>
-                        <p>
-                            I am a Senior AI/ML and CUDA Engineer with a deep passion for creating cutting-edge solutions in
-                            computer vision, real-time AI systems, and scalable deep learning applications. With a
-                            strong foundation in advanced algorithm design and optimization, I have honed my
-                            expertise
-                            in bridging state-of-the-art research with practical, production-ready systems. My
-                            career is
-                            defined by a drive to solve complex challenges while fostering innovation and
-                            collaboration
-                            within diverse teams.
-                        </p>
-                        <br>
-                        <br>
-                        <p>
-                            Over the years, I have successfully led cross-functional teams, guiding the development of
-                            sub-second human skeletal pose tracking systems, multi-modal human skeleton pose
-                            optimization, and
-                            action recognition pipelines. These projects required not only strong technical expertise
-                            but also a meticulous focus on building scalable, maintainable, and high-performance
-                            software. I take pride in delivering robust solutions that integrate seamlessly into
-                            production environments, ensuring reliability, efficiency, and long-term value.
-                        </p>
-                        <br>
-                        <br>
-                        <p>
-                            With over 10 years of experience in C++ and Python, I am proficient in a wide range of
-                            tools
-                            and libraries, including high-performance computing frameworks (OpenMP, BLAS, Eigen,
-                            Ceres,
-                            Boost, TBB), GPGPU programming (CUDA, CuDNN), and deep learning frameworks (PyTorch,
-                            OpenCV,
-                            numpy, pandas, matplotlib/seaborn, scipy). My expertise extends to orchestration tools
-                            such
-                            as Union/Flyte and MLflow, which I leverage to streamline development, enable
-                            reproducibility, and ensure scalability in AI workflows.
-                        </p>
-                        <br>
-                        <br>
-                        <!-- <p>
-                            Equally comfortable in high-pressure startup environments and structured organizations,
-                            I
-                            excel at taking ownership of projects from concept to deployment. Whether optimizing
-                            inference pipelines with TensorRT or developing custom CUDA kernels for
-                            performance-critical
-                            tasks, my work reflects a commitment to quality, precision, and innovation.
-
-                        </p> -->
-                        <br>
-                        <h2>My Motivation</h2> </br>
-                        <p>
-                            At the core of my work is a passion for transforming state-of-the-art research into
-                            tangible, high-quality products. I am inspired by the process of unraveling complex
-                            problems
-                            and translating innovative ideas into systems that deliver measurable impact. My
-                            ultimate
-                            goal is to bridge the gap between academic excellence and industrial applicability,
-                            ensuring
-                            that the solutions I help create are both cutting-edge and practical.
-                        </p>
-
-
-                    </div>
                 </div>
 
             </div>
