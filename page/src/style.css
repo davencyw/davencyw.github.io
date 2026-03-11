@@ -229,20 +229,25 @@ footer-left {
 }
 
 .extra-info::-webkit-scrollbar {
-    width: 10px;                        /* Width of the scrollbar */
+    width: 10px;
+    /* Width of the scrollbar */
 }
 
 .extra-info::-webkit-scrollbar-track {
-    background: black;                  /* Track color */
+    background: black;
+    /* Track color */
 }
 
 .extra-info::-webkit-scrollbar-thumb {
-    background: white;                  /* Scrollbar color */
-    border-radius: 5px;                 /* Optional: rounded scrollbar */
+    background: white;
+    /* Scrollbar color */
+    border-radius: 5px;
+    /* Optional: rounded scrollbar */
 }
 
 .extra-info::-webkit-scrollbar-thumb:hover {
-    background: #ccc;                   /* Optional: hover effect */
+    background: #ccc;
+    /* Optional: hover effect */
 }
 
 #toggle-more {
@@ -294,10 +299,13 @@ footer-left {
 }
 
 @keyframes scrollBounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: rotate(45deg) translate(0, 0);
         opacity: 0.5;
     }
+
     50% {
         transform: rotate(45deg) translate(5px, 5px);
         opacity: 1;
@@ -399,11 +407,13 @@ footer-left {
     height: 100%;
     object-fit: cover;
     opacity: 0.85;
-    transition: opacity 0.3s ease;
+    filter: grayscale(100%);
+    transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
 .project-card:hover .project-image img {
     opacity: 1;
+    filter: grayscale(100%);
 }
 
 .project-card-info {
@@ -547,63 +557,63 @@ footer-left {
     .outer-container {
         padding: 10px;
     }
-    
+
     .inner-box {
         padding: 15px;
         padding-left: 20px;
         height: calc(100% - 45px);
     }
-    
+
     h1 {
         font-size: 48px;
         margin-bottom: 10px;
     }
-    
+
     h2 {
         font-size: 22px;
     }
-    
+
     #subtitle {
         margin-left: 5px;
     }
-    
+
     #title h1,
     #name {
         font-size: clamp(50px, 10vw, 100px);
     }
-    
+
     #title #subtitle {
         font-size: clamp(18px, 4vw, 32px);
     }
-    
+
     #hero-section {
         height: calc(100vh - 80px);
     }
-    
+
     #name {
         /* Adjust for tablet: 10px(outer) + 1.5px(border) + 15px(inner) + (100vh - 80px)/2 */
         top: calc(26.5px + (100vh - 80px) / 2);
     }
-    
+
     .scroll-indicator {
         bottom: 30px;
     }
-    
+
     .scroll-arrow {
         width: 20px;
         height: 20px;
     }
-    
+
     /* Content sections responsive */
     #content-sections {
         width: 100%;
     }
-    
+
     .projects-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
-    
+
     .project-card-info {
         padding: 12px 14px;
     }
@@ -611,16 +621,16 @@ footer-left {
     .project-card-title {
         font-size: 13px;
     }
-    
+
     .logs-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
-    
+
     .log-entry {
         min-height: 100px;
     }
-    
+
     /* Make extra-info section fullscreen on mobile */
     .extra-info {
         position: absolute;
@@ -634,18 +644,18 @@ footer-left {
         padding: 30px 20px;
         box-sizing: border-box;
     }
-    
+
     footer {
         font-size: 9px;
         padding: 12px 0 0 0;
         bottom: 10px;
         width: calc(100% - 40px);
     }
-    
+
     #threejs-background {
         opacity: 0.3;
     }
-    
+
     .close-btn {
         color: rgb(100, 100, 100);
         font-size: 18px;
@@ -659,59 +669,59 @@ footer-left {
     .outer-container {
         padding: 8px;
     }
-    
+
     .inner-box {
         padding: 12px;
         padding-left: 15px;
         height: calc(100% - 40px);
     }
-    
+
     h1 {
         font-size: 36px;
         margin-bottom: 8px;
     }
-    
+
     h2 {
         font-size: 18px;
     }
-    
+
     p {
         font-size: 13px;
     }
-    
+
     #title h1,
     #name {
         font-size: clamp(40px, 12vw, 70px);
     }
-    
+
     #title #subtitle {
         font-size: clamp(16px, 5vw, 24px);
     }
-    
+
     #hero-section {
         height: calc(100vh - 70px);
     }
-    
+
     #name {
         /* Adjust for mobile: 8px(outer) + 1.5px(border) + 12px(inner) + (100vh - 70px)/2 */
         top: calc(21.5px + (100vh - 70px) / 2);
     }
-    
+
     .scroll-indicator {
         bottom: 25px;
     }
-    
+
     .scroll-arrow {
         width: 18px;
         height: 18px;
     }
-    
+
     /* Single column on small screens */
     .projects-grid {
         grid-template-columns: 1fr;
         gap: 12px;
     }
-    
+
     .project-card-info {
         padding: 10px 12px;
     }
@@ -719,41 +729,41 @@ footer-left {
     .project-card-title {
         font-size: 13px;
     }
-    
+
     .logs-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
-    
+
     .log-entry {
         min-height: 90px;
         padding: 12px;
     }
-    
+
     .section-header h2 {
         font-size: 15px;
     }
-    
+
     .log-title {
         font-size: 12px;
     }
-    
+
     .log-description {
         font-size: 11px;
     }
-    
+
     .tag {
         font-size: 9px;
         padding: 2px 6px;
     }
-    
+
     .extra-info {
         padding: 25px 15px;
         max-height: 75%;
         width: 95%;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     footer {
         font-size: 8px;
         padding: 10px 0 0 0;
@@ -761,6 +771,3 @@ footer-left {
         width: calc(100% - 24px);
     }
 }
-
-
-
