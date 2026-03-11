@@ -62,29 +62,31 @@
 
 
 
-<body class="latex-light">
+<body class="latex-dark">
     <!-- <div class="full-width-banner">
         This article is a <i>Work in Progress</i>. Content may be incomplete or subject to change.
     </div> -->
 
 
-    <button id="dark-mode-toggle">Dark Mode</button>
+    <button id="dark-mode-toggle">Light Mode</button>
     <script>
         const toggleButton = document.querySelector("#dark-mode-toggle");
-        toggleButton
-            .addEventListener('click', () => {
-                document.body.classList.toggle("latex-dark");
-                console.log(toggleButton.textContent);
-                if (toggleButton.textContent == "Light Mode") {
-                    toggleButton.textContent = "Dark Mode";
-                    toggleButton.style.backgroundColor = "#e0e0e0"; // Light background
-                    toggleButton.style.color = "#333"; // Dark text
-                } else {
-                    toggleButton.textContent = "Light Mode";
-                    toggleButton.style.backgroundColor = "#565656"; // Dark background
-                    toggleButton.style.color = "white"; // Light text
-                }
-            });
+        // Set initial dark mode button style
+        toggleButton.style.backgroundColor = "#565656";
+        toggleButton.style.color = "white";
+        
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle("latex-dark");
+            if (toggleButton.textContent == "Light Mode") {
+                toggleButton.textContent = "Dark Mode";
+                toggleButton.style.backgroundColor = "#e0e0e0";
+                toggleButton.style.color = "#333";
+            } else {
+                toggleButton.textContent = "Light Mode";
+                toggleButton.style.backgroundColor = "#565656";
+                toggleButton.style.color = "white";
+            }
+        });
     </script>
 
     <header>
@@ -92,7 +94,7 @@
     </header>
 
 
-    <p class="author">David Schmidig <br> January, 2025</p>
+    <p class="author">David Blum <br> January, 2025</p>
 
     <div class="abstract">
         <h2>Abstract</h2>
