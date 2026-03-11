@@ -96,10 +96,9 @@
         <p>
             SGLang is a high-performance inference engine for large language models, but like any complex system,
             it harbors non-obvious bottlenecks that emerge under real-world workloads. This project documents a
-            systematic investigation into SGLang's performance characteristics — from profiling the runtime to
-            identifying hot paths in the scheduler, memory management, and CUDA kernel dispatch — and the
-            targeted optimizations applied to resolve them. The goal is to bridge the gap between theoretical
-            hardware utilization and observed throughput in production serving scenarios.
+            systematic investigation into SGLang's performance characteristics. From profiling the runtime to
+            identifying hot paths in and targeted optimizations applied to resolve them. The goal is to bridge the gap
+            between theoretical hardware utilization and observed throughput in production serving scenarios.
         </p><br>
     </div>
 
@@ -107,32 +106,48 @@
         <article>
             <h2>1. Motivation</h2>
             <p>
-                As LLM inference moves from research settings into production, inference engines like SGLang
-                become critical infrastructure. Small inefficiencies — a suboptimal kernel selection, unnecessary
-                CPU-GPU synchronization, or cache thrashing under bursty request patterns — can compound into
-                significant throughput losses at scale. Rather than accepting these as fixed costs, this project
-                takes a measurement-first approach: profile first, optimize second, and validate with reproducible
-                benchmarks.
+                After stumbling on articles from <a
+                    href="https://hazyresearch.stanford.edu/blog/2025-05-27-no-bubbles">HazyResearch</a>
+                and <a href="https://blog.luminal.com/p/compiling-models-to-megakernels">Luminal</a>
+                about <label for="sn-megakernels" class="sidenote-toggle sidenote-number">Megakernels</label>,
+                <input type="checkbox" id="sn-megakernels" class="sidenote-toggle" />
+                <span class="sidenote">I had previously found myself in a similar position writing megakernels
+                    for cryptographic workloads rather than ML. The same fundamental tension applies: minimising
+                    kernel launch overhead while maximising memory bandwidth and SM concurrency to fully utilise the
+                    hardware.</span>
+                I wanted to understand
+                how SOTA production LLM inference engine work on a lower level. I was curious about
+                its scheduling, memory management, and kernel execution as these systems become the backbone of deployed
+                AI products.
+                SGLang was a good candidate to get started with as it is a production-ready inference engine and is
+                well-documented.
+            </p>
+            <p>
+                This project started as a learning exercise: read the codebase, understand the design decisions,
+                and build intuition for how a system like this manages the tension between latency, throughput,
+                and memory. The natural next step was to profile it under realistic workloads — and once you start
+                measuring, bottlenecks reveal themselves. This is a record of that process: what SGLang does,
+                where it slows down, and what can be done about it.
             </p>
 
             <h2>2. Approach</h2>
             <p>
-                <i>This section is under construction.</i>
+                <i>Coming soon.</i>
             </p>
 
             <h2>3. Findings</h2>
             <p>
-                <i>This section is under construction.</i>
+                <i>Coming soon.</i>
             </p>
 
             <h2>4. Optimizations</h2>
             <p>
-                <i>This section is under construction.</i>
+                <i>Coming soon.</i>
             </p>
 
             <h2>5. Results</h2>
             <p>
-                <i>This section is under construction.</i>
+                <i>Coming soon.</i>
             </p>
         </article>
     </main>
