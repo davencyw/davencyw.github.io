@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moving a Distributed GPU Service into TEEs</title>
+    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
+    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
+
+    <style>
+        #dark-mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 15px;
+            background-color: #565656;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background-color: rgba(100, 100, 100, 0.3);
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .tags {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body class="latex-dark">
+    <button id="dark-mode-toggle">Light Mode</button>
+    <script>
+        const toggleButton = document.querySelector("#dark-mode-toggle");
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle("latex-dark");
+            if (toggleButton.textContent == "Light Mode") {
+                toggleButton.textContent = "Dark Mode";
+                toggleButton.style.backgroundColor = "#e0e0e0";
+                toggleButton.style.color = "#333";
+            } else {
+                toggleButton.textContent = "Light Mode";
+                toggleButton.style.backgroundColor = "#565656";
+                toggleButton.style.color = "white";
+            }
+        });
+    </script>
+
+    <header>
+        <h1>Moving a Distributed GPU Service into TEEs</h1>
+        <p class="author">Technical Log - March 2026</p>
+        <div class="tags">
+            <span class="tag">GPU</span>
+            <span class="tag">Security</span>
+            <span class="tag">CUDA</span>
+            <span class="tag">TEE</span>
+        </div>
+    </header>
+
+    <div class="abstract">
+        <h2>Summary</h2>
+        <p>
+            Traditional GPU computing has a blind spot for data confidentiality: unlike CPUs, GPUs historically lacked
+            hardware-backed Trusted Execution Environments (TEEs). That changed with NVIDIA's Hopper architecture
+            and GPU Confidential Computing. This log covers the practical experience of moving a distributed GPU service
+            into a TEE, why we needed it, how the hardware isolation actually works, what changed in practice, and
+            other things I observed.
+        </p>
+    </div>
+
+    <main>
+        <article>
+            <h2>Why We Needed Confidential GPU Computing</h2>
+            <p>
+                In our project, a privacy-focused blockchain, users entrust us with sensitive data that must
+                remain private even from us as a service operator. To build true trust, we wanted a setup where not even
+                we could peek into customer data or intermediate results.
+            </p>
+            <p>
+                TEEs make this possible by isolating computations and ensuring data remains accessible only to trusted
+                software inside a verified enclave. With GPU TEEs, we can offload cryptographic workloads and heavy
+                computation while maintaining this isolation. It also eliminates a major attack surface because data
+                is never visible in plaintext to the host or hypervisor.
+            </p>
+
+            <h2>How GPU Memory Security Works</h2>
+            <p>
+                NVIDIA's GPU Confidential Computing (GPU-CC), introduced with the Hopper architecture, finally extends
+                TEEs to GPUs. It is not a one-to-one mirror of CPU-based TEE features since the GPU world has its own
+                design constraints and threat model.
+            </p>
+            <p>Here are the key mechanisms that make GPU TEEs work:</p>
+            <ul>
+                <li>
+                    <strong>No Runtime Memory Encryption:</strong> Unlike AMD SEV or Intel TDX, GPUs do not encrypt
+                    on-package HBM memory. The assumption is that decapsulating the GPU to probe HBM physically is
+                    out of scope for realistic attacks, so security relies on strict hardware access control.
+                </li>
+                <li>
+                    <strong>Encrypted PCIe Transfers and Staging Buffers:</strong> The CPU-GPU interconnect is
+                    untrusted, so all data passing over PCIe is encrypted. The CPU's Confidential Virtual Machine
+                    (CVM) and the GPU establish an SPDM (Security Protocol and Data Model) session to exchange
+                    cryptographic keys. Data first passes through unencrypted <em>staging buffers</em> in system
+                    memory, but the GPU's <strong>Copy Engine (CE)</strong> and <strong>GPU System Processor
+                        (GSP)</strong> decrypt and move it securely into the Compute Protected Region (CPR).
+                </li>
+                <li>
+                    <strong>Compute Protected Region (CPR) and PCIe Firewall:</strong> Most of the GPU's memory,
+                    roughly 90%, forms a secure enclave called the CPR. A hardware PCIe firewall blocks direct
+                    access to this region. Standard host access paths, such as PCIe Base Address Registers
+                    (including BAR2), are completely disabled in confidential mode to prevent host or hypervisor
+                    snooping.
+                </li>
+                <li>
+                    <strong>MMU Enforcement with Copy Engine Integration:</strong> The GPU's Memory Management Unit
+                    (MMU) works with the Copy Engine to strictly enforce memory boundaries. Once a compute engine
+                    operates inside the CPR, it cannot access unprotected memory. Any attempt to violate this rule
+                    triggers a memory fault.
+                </li>
+                <li>
+                    <strong>Mandatory Memory Scrubbing:</strong> Before a GPU can be detached and reassigned, the
+                    <strong>Secure Processor (SEC2)</strong> performs a soft reset that wipes all cryptographic keys
+                    and data from memory, preventing potential data leakage if a malicious VM were to claim the GPU
+                    afterward.
+                </li>
+            </ul>
+            <p>
+                These combined mechanisms provide strong isolation while keeping overhead low enough for heavy compute
+                workloads.
+            </p>
+
+            <h2>Making Your Environment TEE-Ready</h2>
+            <p>
+                Not every setup can run confidential workloads today. You will need a compatible CPU (with SEV-SNP or
+                TDX support) and a Hopper or newer GPU. NVIDIA provides a
+                <a
+                    href="https://www.nvidia.com/en-us/data-center/solutions/confidential-computing/secure-ai-compatibility-matrix">Secure
+                    AI Compatibility Matrix</a>
+                to check whether your hardware and software stack supports confidential computing.
+            </p>
+            <p>Some quick sanity checks:</p>
+            <pre><code class="language-bash">nvidia-smi conf-compute -grs
+# Should output: Confidential Compute GPUs Ready state: ready
+
+nvidia-smi conf-compute -f
+# Should output: CC status: ON</code></pre>
+            <p>
+                To verify security, perform attestation — the process of cryptographically confirming that the GPU
+                and its drivers are genuine and secure. NVIDIA's
+                <a href="https://github.com/NVIDIA/nvtrust/blob/main/guest_tools/attestation_sdk/README.md">Attestation
+                    SDK</a>
+                supports both local and remote verification. It can attest not only individual GPUs but also the
+                NVSwitch fabric in multi-GPU systems. For example:
+            </p>
+            <pre><code class="language-bash">python3 /gpu-attestation/nv_attestation_sdk/tests/SmallGPUTest.py</code></pre>
+            <p>
+                Once attested, you can run your workloads normally inside the CVM. For most use cases, no code changes
+                are needed.
+            </p>
+
+            <h2>What Changes in Practice</h2>
+            <p>
+                From a developer's perspective, moving workloads into TEEs was surprisingly smooth. Our existing
+                core compute worked without modification but we had to work around different limiations.
+            </p>
+            <p>A few caveats:</p>
+            <ul>
+                <li>
+                    <strong>MIG (Multi-Instance GPU)</strong> is not supported in TEE mode because MIG partitions
+                    share memory and bus resources, which violates the strict physical and logical isolation required
+                    for confidential computing.
+                </li>
+                <li>
+                    <strong>Multi-GPU setups</strong> remain limited for now. Cloud platforms like GCP currently
+                    offer only single-GPU passthrough, but in theory, Hopper supports either single-GPU or
+                    full-platform passthrough. The newer Blackwell generation adds enhanced inter-GPU security
+                    features, improving isolation for connected GPUs operating in TEE mode.
+                </li>
+                <li>
+                    <strong>MPS (Multi-Process Service)</strong> is not officially supported, but it worked well in our
+                    tests and does so in our current production environment.
+                </li>
+            </ul>
+
+            <p>
+                For our distributed use case, this meant we needed to redesign our code around not being able to use MIG
+                and multi-GPU instances and distribute that load onto several machines and splitting resources using MPS
+                only.
+            </p>
+
+            <h2>Performance Observations</h2>
+            <p>
+                We benchmarked our cryptographic workloads, mainly NTT, MSM, and ZK-friendly hashing, inside the GPU
+                TEE.
+                The overhead was minimal, typically under <strong>5%</strong>, mostly due to encrypted transfers
+                over PCIe. Compute throughput itself remained virtually identical. Minimizing IO and parallelizing
+                compute with data transfers is key to keeping the overhead low.
+            </p>
+            <p>
+                This made the trade-off very appealing: hardware-enforced confidentiality with minimal runtime
+                penalty.
+            </p>
+
+            <h2>What This Unlocks</h2>
+            <p>
+                With both CPU and GPU attestation, we can offer users a strong guarantee that their data stays
+                private, verified cryptographically at runtime.
+            </p>
+            <p>
+                Of course, transparency still matters. If the code is not open source, users cannot verify what
+                happens inside the enclave. However, TEEs make it cryptographically impossible for operators to
+                leak or tamper with user data from outside.
+            </p>
+
+            <h2>Resources and Further Reading</h2>
+            <p>If you want to explore deeper, these are excellent starting points:</p>
+            <ul>
+                <li><a href="https://arxiv.org/pdf/2507.02770">GPU Confidential Computing Demystified (arXiv)</a></li>
+                <li><a href="https://www.nvidia.com/en-us/data-center/h100/">NVIDIA H100 Documentation</a></li>
+                <li><a href="https://www.nvidia.com/en-us/data-center/solutions/confidential-computing/">NVIDIA
+                        Confidential Computing Overview</a></li>
+                <li><a href="https://docs.nvidia.com/590trd1-trusted-computing-solutions-release-notes.pdf">Trusted
+                        Computing Solutions – Release Notes (PDF)</a></li>
+                <li><a href="https://docs.nvidia.com/cc-deployment-guide-tdx.pdf">Deployment Guide for SecureAI</a></li>
+                <li><a href="https://docs.nvidia.com/attestation/attestation-client-tools-sdk/latest/index.html">Attestation
+                        SDK Docs</a></li>
+                <li><a href="https://github.com/nvidia/nvtrust">nvtrust on GitHub</a></li>
+            </ul>
+        </article>
+    </main>
+</body>
+
+</html>
