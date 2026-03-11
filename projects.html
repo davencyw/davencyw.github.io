@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects - David Blum</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,7 +14,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             background: rgb(18, 18, 18);
             font-family: 'Space Grotesk', sans-serif;
             min-height: 100vh;
@@ -81,11 +83,13 @@
             height: 100%;
             object-fit: cover;
             opacity: 0.85;
-            transition: opacity 0.3s ease;
+            filter: grayscale(100%);
+            transition: opacity 0.3s ease, filter 0.3s ease;
         }
 
         .project-card:hover .project-image img {
             opacity: 1;
+            filter: grayscale(100%);
         }
 
         .project-content {
@@ -163,19 +167,32 @@
     <div class="page-container">
         <a href="/" class="back-link">&larr; Back</a>
         <h1>Projects</h1>
-        
+
         <div class="projects-grid">
+            <!--
+            <a href="/projects/sglang-bottlenecks.html" class="project-card">
+                <div class="project-image">
+                    <img src="/projects/sglang_bottlenecks/preview.png" alt="SGLang Bottlenecks">
+                </div>
+                <div class="project-content">
+                    <div class="project-title">Uncovering and Resolving Bottlenecks in SGLang</div>
+                    <div class="project-description">Systematic profiling and optimization of SGLang's LLM inference engine under production workloads</div>
+                    <div class="project-year">Mar 2026 — WIP</div>
+                </div>
+            </a>
+            -->
+
             <a href="/projects/paperviewer.html" class="project-card">
                 <div class="project-image">
                     <img src="/projects/paperviewer/preview.png" alt="Paper Viewer">
                 </div>
                 <div class="project-content">
-                    <div class="project-title">Cutting Through the Noise</div>
+                    <div class="project-title">Cutting Through the Noise - Automated AI Paper Curation</div>
                     <div class="project-description">Automated AI Paper Curation with Language Models and RLHF</div>
-                    <div class="project-year">2025</div>
+                    <div class="project-year">Jan 2025</div>
                 </div>
             </a>
-            
+
             <!-- Add more project cards here -->
         </div>
     </div>
