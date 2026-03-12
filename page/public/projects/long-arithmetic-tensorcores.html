@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accelerating Long Arithmetic with TensorCores</title>
+    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- syntax highlighting -->
+    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-python.min.js"></script>
+
+    <style>
+        #dark-mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 15px;
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .banner {
+            background-color: #fff8dc;
+            color: #000;
+            padding: 10px 20px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .full-width-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            background-color: #fff8dc;
+            color: #000;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #ffd700;
+            z-index: 1000;
+        }
+
+        body:has(.full-width-banner) header {
+            margin-top: 60px;
+        }
+
+        body:has(.full-width-banner) #dark-mode-toggle {
+            margin-top: 60px;
+        }
+    </style>
+</head>
+
+<body class="latex-dark">
+    <div class="full-width-banner">
+        This article is a <i>Work in Progress</i>. Content may be incomplete or subject to change.
+    </div>
+
+    <button id="dark-mode-toggle">Light Mode</button>
+    <script>
+        const toggleButton = document.querySelector("#dark-mode-toggle");
+        toggleButton.style.backgroundColor = "#565656";
+        toggleButton.style.color = "white";
+
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle("latex-dark");
+            if (toggleButton.textContent == "Light Mode") {
+                toggleButton.textContent = "Dark Mode";
+                toggleButton.style.backgroundColor = "#e0e0e0";
+                toggleButton.style.color = "#333";
+            } else {
+                toggleButton.textContent = "Light Mode";
+                toggleButton.style.backgroundColor = "#565656";
+                toggleButton.style.color = "white";
+            }
+        });
+    </script>
+
+    <header>
+        <h1>Accelerating Long Arithmetic with TensorCores</h1>
+    </header>
+
+    <p class="author">David Blum <br> April, 2026</p>
+
+    <div class="abstract">
+        <h2>Abstract</h2>
+        <p>
+            Modern GPU TensorCores are designed to accelerate dense matrix multiply-accumulate operations, yet their
+            potential for accelerating long integer arithmetic, as used in cryptography, arbitrary-precision
+            computation, and zero-knowledge proof systems, remains largely unexplored. This project investigates
+            how TensorCore hardware can be repurposed to perform multi-limb integer arithmetic at high throughput,
+            mapping the carry-propagation structure of long addition and multiplication onto the low-precision
+            matrix engines available on NVIDIA GPUs.
+        </p><br>
+    </div>
+
+    <main>
+        <article>
+            <h2>1. Motivation</h2>
+            <p>
+                <i>Coming soon.</i>
+            </p>
+
+            <h2>2. Background</h2>
+            <p>
+                <i>Coming soon.</i>
+            </p>
+
+            <h2>3. Approach</h2>
+            <p>
+                <i>Coming soon.</i>
+            </p>
+
+            <h2>4. Results</h2>
+            <p>
+                <i>Coming soon.</i>
+            </p>
+        </article>
+    </main>
+</body>
+
+</html>
