@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uncovering and Resolving Bottlenecks in SGLang</title>
+    <title>Uncovering and Resolving Bottlenecks for Llama 3 in SGLang</title>
     <link rel="stylesheet" href="https://latex.vercel.app/style.css">
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
@@ -57,36 +57,133 @@
         body:has(.full-width-banner) #dark-mode-toggle {
             margin-top: 60px;
         }
+
+        details.profiler-output {
+            margin: 1em 0;
+        }
+
+        details.profiler-output summary {
+            cursor: pointer;
+            font-size: 0.9em;
+            color: rgb(150, 150, 150);
+            user-select: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4em;
+        }
+
+        details.profiler-output summary::before {
+            content: '▶';
+            font-size: 0.75em;
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+
+        details.profiler-output[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        details.profiler-output summary::-webkit-details-marker {
+            display: none;
+        }
+
+        h5 {
+            font-size: 1em;
+            font-weight: bold;
+            margin: 1.2em 0 0.3em;
+        }
+
+        details.gemm-analysis table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.82em;
+            margin-top: 0.8em;
+        }
+
+        details.gemm-analysis th,
+        details.gemm-analysis td {
+            border: 1px solid #bbb;
+            padding: 5px 9px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        details.gemm-analysis th {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        details.gemm-analysis td:first-child,
+        details.gemm-analysis th:first-child {
+            text-align: left;
+        }
+
+        details.gemm-analysis tr.total-row td {
+            font-weight: bold;
+            border-top: 2px solid #888;
+        }
+
+        details.gemm-analysis pre {
+            margin: 0.8em 0 0.4em;
+            font-size: 0.85em;
+        }
+
+        .zoomable {
+            cursor: zoom-in;
+        }
+
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #lightbox.active {
+            display: flex;
+        }
+
+        #lightbox img {
+            max-width: 92vw;
+            max-height: 92vh;
+            border-radius: 4px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            cursor: zoom-out;
+        }
     </style>
 </head>
 
-<body class="latex-dark">
+<body>
     <div class="full-width-banner">
         This article is a <i>Work in Progress</i>. Content may be incomplete or subject to change.
     </div>
 
-    <button id="dark-mode-toggle">Light Mode</button>
+    <button id="dark-mode-toggle">Dark Mode</button>
     <script>
         const toggleButton = document.querySelector("#dark-mode-toggle");
-        toggleButton.style.backgroundColor = "#565656";
-        toggleButton.style.color = "white";
+        toggleButton.style.backgroundColor = "#e0e0e0";
+        toggleButton.style.color = "#333";
 
         toggleButton.addEventListener('click', () => {
             document.body.classList.toggle("latex-dark");
-            if (toggleButton.textContent == "Light Mode") {
-                toggleButton.textContent = "Dark Mode";
-                toggleButton.style.backgroundColor = "#e0e0e0";
-                toggleButton.style.color = "#333";
-            } else {
+            if (toggleButton.textContent == "Dark Mode") {
                 toggleButton.textContent = "Light Mode";
                 toggleButton.style.backgroundColor = "#565656";
                 toggleButton.style.color = "white";
+            } else {
+                toggleButton.textContent = "Dark Mode";
+                toggleButton.style.backgroundColor = "#e0e0e0";
+                toggleButton.style.color = "#333";
             }
         });
     </script>
 
     <header>
-        <h1>Uncovering and Resolving Bottlenecks in SGLang</h1>
+        <h1>Uncovering and Resolving Bottlenecks for Llama 3 in SGLang</h1>
     </header>
 
     <p class="author">David Blum <br> March, 2026</p>
@@ -126,14 +223,291 @@
                 This project started as a learning exercise: read the codebase, understand the design decisions,
                 and build intuition for how a system like this manages the tension between latency, throughput,
                 and memory. The natural next step was to profile it under realistic workloads, and once you start
-                measuring, bottlenecks reveal themselves. This is a record of that process: what SGLang does,
+                measuring, bottlenecks reveal themselves. This article documents that process: what SGLang does,
                 where it slows down, and what can be done about it.
             </p>
 
             <h2>2. Approach</h2>
             <p>
-                <i>Coming soon.</i>
+                To keep the initial exploration tractable, I deliberately narrowed the setting to a single, well-defined
+                configuration.
+                All experiments run on a single Ampere A100 SXM4-40GB GPU with a Llama 3 8B model
+                and a fixed batch size of 64. This makes it easier to attribute
+                performance characteristics to the core inference engine.
             </p>
+            <p>
+                The first step is to use SGLang's <code>bench_one_batch</code> <a
+                    href="https://docs.sglang.io/developer_guide/benchmark_and_profiling.html">utility</a>, which
+                profiles a single static
+                batch end to end.
+                It instantiates a <code>ModelRunner</code> directly and runs prefill and decode separately, bypassing
+                the scheduler and any serving stack. This is ideal for understanding kernel timings and scheduling
+                behavior within one decode step, even though it does not reflect real-world serving dynamics such as
+                variable-length prompts, queuing, or adaptive batching.
+            </p>
+
+            <h3>2.1 Llama 3 8B</h3>
+
+            <h4>Performance-Critical Details</h4>
+
+            <h5>1. Grouped Query Attention (GQA)</h5>
+            <p>
+                8 KV heads shared across 32 query heads.
+                This reduces the per-token KV cache footprint by <strong>4×</strong> compared to full MHA, which
+                directly shrinks memory bandwidth pressure during decoding — the dominant bottleneck in autoregressive
+                generation.
+                In SGLang, the <code>RadixAttention</code> layer (used instead of plain
+                <code>nn.MultiheadAttention</code>) exploits the smaller KV tensors for its prefix-sharing / radix-cache
+                mechanism.
+            </p>
+
+            <h5>2. SwiGLU via fused <code>gate_up_proj</code></h5>
+            <p>
+                The two-stream FFN gate and up projections are <strong>merged into a single
+                    <code>MergedColumnParallelLinear</code></strong>, halving the number of GEMM kernel launches and
+                enabling the fused <code>SiluAndMul</code> activation kernel.
+            </p>
+
+            <h5>3. RMSNorm with fused residual</h5>
+            <p>
+                <code>RMSNorm</code> skips mean-centering (cheaper than LayerNorm). SGLang's <code>RMSNorm</code>
+                accepts an optional <code>residual</code> tensor and performs the add-norm in a single fused kernel,
+                avoiding an extra read/write of the hidden-state tensor between layers.
+            </p>
+
+            <h5>4. Large vocabulary (128 256 tokens)</h5>
+            <p>
+                The final <code>lm_head</code> linear projects from hidden dim 4096 → 128 256 logits. This is the
+                largest vocab in the Llama family and can become a <strong>softmax / logit-compute bottleneck</strong>
+                at small batch sizes. SGLang uses <code>ParallelLMHead</code> with
+                <code>VocabParallelEmbedding</code> to shard this across tensor-parallel ranks.
+            </p>
+
+            <hr>
+
+            <h3>2.2 Profile BF16</h3>
+            <p>
+                I always like to take a look at NSIGHT System first to get a high-level overview of the GPU and kernel
+                usage. If we take a look at the profile, we clearly see that the kernels are far spread out over the
+                timeline indicating that the GPU is not fully utilised. This hints on potential CPU based
+                <label for="sn-cuda-graphs-gaps" class="sidenote-toggle sidenote-number">bottlenecks</label>
+                <input type="checkbox" id="sn-cuda-graphs-gaps" class="sidenote-toggle" />
+                <span class="sidenote">CUDA graphs are disabled here, but the visible gaps between kernels in the
+                    Nsight Systems timeline are not purely kernel-launch overhead. They are too big for them to only be
+                    launch overhead.</span>
+                and rises the question how we can utilise the GPU fully with this setup. So, let's take a look at the
+                Torch profiler output to get more insight on the CPU side as well.
+            </p>
+            <figure>
+                <img src="sglang_bottlenecks/nsight_bf16.png" alt="Nsight Systems trace — BF16 baseline"
+                    style="width: 100%; border-radius: 4px;" class="zoomable"
+                    onclick="document.getElementById('lightbox').classList.add('active'); document.getElementById('lightbox-img').src=this.src;">
+                <figcaption>Nsight Systems trace for a single layer of the decode step (batch size 64, CUDA graphs
+                    disabled). Kernels
+                    are visibly spread out across the timeline.
+                </figcaption>
+            </figure>
+            <p>
+                The table below shows a representative slice of the Torch profiler output for a decode step with batch
+                size 64,
+                CUDA graphs disabled, and NVTX markers enabled. It lists the top operators by self CPU time and includes
+                their
+                corresponding CUDA time and call counts.
+            </p>
+
+            <details class="profiler-output">
+                <summary>Profile trace output (expand)</summary>
+                <pre>
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                               aten::mm        21.42%       6.933ms        30.98%      10.027ms      77.731us      14.928ms        75.53%      14.928ms     115.723us           129  
+                                       cudaLaunchKernel        14.23%       4.606ms        14.23%       4.606ms      17.251us       0.000us         0.00%       0.000us       0.000us           267  
+                                Activity Buffer Request         8.39%       2.716ms         8.39%       2.716ms       2.716ms       2.593us         0.01%       2.593us       2.593us             1  
+                                    cudaLaunchKernelExC         7.59%       2.457ms         7.59%       2.457ms      19.048us       0.000us         0.00%       0.000us       0.000us           129  
+                             sglang::apply_rope_inplace         4.39%       1.420ms         6.52%       2.110ms      65.938us     104.960us         0.53%     104.960us       3.280us            32  
+                                            aten::empty         4.09%       1.323ms         4.09%       1.323ms      13.505us       0.000us         0.00%       0.000us       0.000us            98  
+                                             aten::view         3.61%       1.169ms         3.61%       1.169ms       3.619us       0.000us         0.00%       0.000us       0.000us           323  
+                                            aten::copy_         3.36%       1.087ms        13.93%       4.509ms     104.850us     196.484us         0.99%     199.077us       4.630us            43  
+                                    sglang::store_cache         3.34%       1.082ms         5.42%       1.755ms      54.829us      77.602us         0.39%      77.602us       2.425us            32  
+                                           aten::linear         2.86%     924.443us        41.39%      13.397ms     104.661us       0.000us         0.00%      14.156ms     110.591us           128  
+                                                aten::t         2.71%     878.034us         6.02%       1.948ms      15.217us       0.000us         0.00%       0.000us       0.000us           128  
+                                       aten::as_strided         2.55%     825.710us         2.55%     825.710us       2.244us       0.000us         0.00%       0.000us       0.000us           368  
+                          sgl_kernel::fused_add_rmsnorm         2.49%     805.753us         6.54%       2.117ms      33.071us     302.944us         1.53%     302.944us       4.734us            64  
+                                        aten::transpose         1.86%     602.505us         3.30%       1.070ms       8.357us       0.000us         0.00%       0.000us       0.000us           128  
+                                           aten::matmul         1.85%     599.146us        32.83%      10.626ms      82.376us       0.000us         0.00%      14.928ms     115.723us           129  
+                                   cudaFuncSetAttribute         1.35%     435.503us         1.35%     435.503us       4.490us       0.000us         0.00%       0.000us       0.000us            97  
+                                 aten::split_with_sizes         1.30%     421.881us         1.82%     588.099us      18.378us       0.000us         0.00%       0.000us       0.000us            32  
+          cudaOccupancyMaxActiveBlocksPerMultiprocessor         1.16%     375.015us         1.16%     375.015us       3.866us       0.000us         0.00%       0.000us       0.000us            97  
+                                  cudaDeviceSynchronize         1.10%     356.730us         1.10%     356.730us     178.365us       0.000us         0.00%       0.000us       0.000us             2  
+                                            aten::clone         0.98%     317.252us        16.18%       5.238ms     158.725us       0.000us         0.00%     143.493us       4.348us            33  
+                               sgl_kernel::silu_and_mul         0.98%     317.207us         2.84%     920.513us      28.766us     263.904us         1.34%     263.904us       8.247us            32  
+                                        aten::unsqueeze         0.97%     314.015us         1.32%     428.367us       6.693us       0.000us         0.00%       0.000us       0.000us            64  
+## Call CompiledFxGraph fc5debfulefezw7hs63rdl3utzgw...         0.97%     313.937us         1.19%     384.736us     384.736us       0.000us         0.00%       1.984us       1.984us             1  
+                             Torch-Compiled Region: 0/0         0.96%     310.291us         2.31%     749.333us     749.333us       0.000us         0.00%       1.984us       1.984us             1  
+                                        cudaMemcpyAsync         0.47%     151.082us         0.47%     151.082us      30.216us       0.000us         0.00%       0.000us       0.000us             5  
+                                       aten::empty_like         0.43%     140.446us         2.04%     659.754us      19.405us       0.000us         0.00%       0.000us       0.000us            34  
+                                               aten::gt         0.42%     135.124us         0.42%     135.124us       2.145us       0.000us         0.00%       0.000us       0.000us            63  
+                                           aten::select         0.40%     128.554us         0.55%     177.289us       2.728us       0.000us         0.00%       0.000us       0.000us            65  
+                                       aten::contiguous         0.40%     128.260us         7.83%       2.535ms      79.228us       0.000us         0.00%     138.307us       4.322us            32  
+                                             aten::item         0.24%      78.558us         0.35%     114.252us       1.785us       0.000us         0.00%       0.000us       0.000us            64  
+                                    aten::empty_strided         0.24%      76.449us         0.24%      76.449us       7.645us       0.000us         0.00%       0.000us       0.000us            10  
+                                           aten::cumsum         0.22%      70.404us         0.34%     108.893us      54.447us       4.288us         0.02%       4.288us       2.144us             2  
+                                       aten::is_nonzero         0.22%      69.836us         0.56%     181.533us       2.881us       0.000us         0.00%       0.000us       0.000us            63  
+                                           aten::unbind         0.20%      65.159us         0.70%     227.784us     227.784us       0.000us         0.00%       0.000us       0.000us             1  
+                                            aten::slice         0.19%      60.540us         0.24%      76.531us       8.503us       0.000us         0.00%       0.000us       0.000us             9  
+                               TorchDynamo Cache Lookup         0.18%      59.382us         0.18%      59.382us      59.382us       0.000us         0.00%       0.000us       0.000us             1  
+                                 cudaDeviceGetAttribute         0.15%      48.452us         0.15%      48.452us       1.346us       0.000us         0.00%       0.000us       0.000us            36  
+                                         aten::_to_copy         0.14%      46.283us         0.85%     276.426us      39.489us       0.000us         0.00%      53.536us       7.648us             7  
+                           triton_poi_fused_clamp_sub_0         0.14%      45.932us         0.22%      70.799us      70.799us       1.984us         0.01%       1.984us       1.984us             1  
+                                             aten::add_         0.14%      43.987us         0.20%      65.034us      21.678us       4.512us         0.02%       4.512us       1.504us             3  
+                                           aten::argmax         0.13%      41.340us         0.23%      73.254us      73.254us      63.904us         0.32%      63.904us      63.904us             1  
+                              aten::_local_scalar_dense         0.11%      35.694us         0.11%      35.694us       0.558us       0.000us         0.00%       0.000us       0.000us            64  
+                                     aten::index_select         0.10%      32.411us         0.36%     116.961us     116.961us       0.000us         0.00%       3.104us       3.104us             1  
+                                               aten::to         0.10%      31.122us         0.95%     307.548us      20.503us       0.000us         0.00%      53.536us       3.569us            15  
+Self CPU time total: 32.370ms
+Self CUDA time total: 19.765ms
+</pre>
+            </details>
+
+            <p>
+                From this snapshot, GEMMs clearly dominate GPU time: <code>aten::mm</code> and <code>aten::matmul</code>
+                together account for 75.53% of self CUDA time (14.928 ms out of 19.765 ms). This is expected
+                in the decode regime: at batch 64 the per-step GEMMs have
+                <label for="sn-arithmetic-intensity" class="sidenote-toggle sidenote-number">arithmetic
+                    intensity</label>
+                <input type="checkbox" id="sn-arithmetic-intensity" class="sidenote-toggle" />
+                <span class="sidenote">A100 BF16 Tensor Core peak: 312 TFLOP/s; HBM2 bandwidth: 1,555 GB/s (1.56 TB/s) →
+                    ridge point: 312 ÷ 1.555 ≈ 200 FLOP/byte. Any kernel below this ratio is memory-bandwidth-bound;
+                    above it, compute-bound.</span>
+                around 64 FLOP/byte, well below
+                the A100's ridge point of roughly 200 FLOP/byte, so these matmuls are firmly in the
+                memory-bandwidth-bound region.
+
+            </p>
+
+            <details class="profiler-output gemm-analysis">
+                <summary>GEMM shapes &amp; arithmetic intensity, Llama 3, bs=64 (expand)</summary>
+
+                <p style="margin: 0.8em 0 0.3em;"><strong>Weight shapes per layer:</strong></p>
+                <pre>QKVParallelLinear(hidden_size, head_dim, total_num_heads, total_num_kv_heads)
+  → weight [4096, (32 + 8 + 8) · 128] = [4096, 6144]
+RowParallelLinear(total_num_heads · head_dim, hidden_size)          (o_proj)
+  → weight [4096, 4096]
+MergedColumnParallelLinear(hidden_size, [intermediate_size] × 2)   (gate_up)
+  → weight [4096, 2 · 14336] = [4096, 28672]
+RowParallelLinear(intermediate_size, hidden_size)                  (down_proj)
+  → weight [14336, 4096]</pre>
+
+                <p style="margin: 0.8em 0 0.3em;"><strong>FLOPs &amp; memory</strong> for activation
+                    <code>[M, K] × weight [K, N]</code>:
+                </p>
+                <pre>FLOPs  = 2 · M · K · N
+Memory ≈ 2 · (K·N + M·K) bytes BF16  — weight term dominates when M ≪ K, N</pre>
+
+                <p style="margin: 0.8em 0 0.3em;"><strong>Concrete numbers for bs=64:</strong></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>GEMM</th>
+                            <th>Shape [M,K]×[K,N]</th>
+                            <th>FLOPs</th>
+                            <th>Weights (BF16)</th>
+                            <th>Activations</th>
+                            <th>Arith. Intensity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>qkv_proj</code></td>
+                            <td><code>[64,4096]×[4096,6144]</code></td>
+                            <td>3.22 GF</td>
+                            <td>48.0 MB</td>
+                            <td>0.50 MB</td>
+                            <td>64.0 F/B</td>
+                        </tr>
+                        <tr>
+                            <td><code>o_proj</code></td>
+                            <td><code>[64,4096]×[4096,4096]</code></td>
+                            <td>2.15 GF</td>
+                            <td>32.0 MB</td>
+                            <td>0.50 MB</td>
+                            <td>64.0 F/B</td>
+                        </tr>
+                        <tr>
+                            <td><code>gate_up_proj</code></td>
+                            <td><code>[64,4096]×[4096,28672]</code></td>
+                            <td>15.03 GF</td>
+                            <td>224.0 MB</td>
+                            <td>0.50 MB</td>
+                            <td>65.1 F/B</td>
+                        </tr>
+                        <tr>
+                            <td><code>down_proj</code></td>
+                            <td><code>[64,14336]×[14336,4096]</code></td>
+                            <td>7.52 GF</td>
+                            <td>112.0 MB</td>
+                            <td>1.75 MB</td>
+                            <td>66.0 F/B</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Layer total</td>
+                            <td></td>
+                            <td>27.92 GF</td>
+                            <td>416 MB</td>
+                            <td></td>
+                            <td>≈64 F/B</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>32-layer model</td>
+                            <td></td>
+                            <td>~893 GF</td>
+                            <td>~13 GB</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </details>
+
+            <p>
+                Nsight Compute confirms that the memory bandwidth throughput is lower than the compute throughput.
+                The predicted compute% (32%) vs observed (42%) gap is explained by L2 cache hits on the activation
+                matrix: [64, 4096] BF16 = 512 KB fits entirely in A100's 40 MB L2, so not all reads hit HBM, raising
+                the effective AI slightly above 64 F/B.
+                Memory throughput being "only" 51% can be explained with the 3-stage software pipeline in the
+                kernel (stages_64x3) thatoverlaps memory loads with tensor core math, so neither resource is fully
+                stalled
+                waiting for the other.
+            </p>
+            <figure>
+                <img src="sglang_bottlenecks/nsight_compute_gemm_bf16.png" alt="Nsight Compute — BF16 GEMM roofline"
+                    style="width: 100%; border-radius: 4px;" class="zoomable"
+                    onclick="document.getElementById('lightbox').classList.add('active'); document.getElementById('lightbox-img').src=this.src;">
+                <figcaption>Nsight Compute roofline for a BF16 GEMM kernel during decode (batch size 64).
+                </figcaption>
+            </figure>
+
+            <p>
+                Two secondary effects stand out in the trace. First, RoPE positional encoding shows a roughly 13×
+                CPU-to-GPU time ratio:
+                1.420 ms of self CPU time versus 104.960 µs of self CUDA time across 32 calls. The dominant
+                cost is the Triton runtime bookkeeping: each Triton launch triggers
+                <code>cudaOccupancyMaxActiveBlocksPerMultiprocessor</code>
+                and <code>cudaFuncSetAttribute</code> to select and configure the kernel at runtime, adding several
+                hundred microseconds of
+                pure host-side overhead that an AOT-compiled CUDA kernel would avoid. Second, the Q tensor passed to
+                FlashInfer's decode
+                wrapper is non-contiguous: it is a slice of a fused QKV projection output. Because the wrapper requires
+                a contiguous Q,
+                it calls <code>q.contiguous()</code>, which internally dispatches <code>aten::clone</code>. Across 32
+                layers this shows up
+                as roughly 281 µs per decode step from <code>aten::contiguous</code> plus <code>aten::clone</code>.
+            </p>
+
+
+            <h3>2.3 Profile INT8</h3>
+            <p> </p>
 
             <h2>3. Findings</h2>
             <p>
@@ -151,6 +525,10 @@
             </p>
         </article>
     </main>
+
+    <div id="lightbox" onclick="this.classList.remove('active');">
+        <img id="lightbox-img" src="" alt="Enlarged view">
+    </div>
 </body>
 
 </html>
