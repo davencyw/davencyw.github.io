@@ -487,19 +487,16 @@ Memory ≈ 2 · (K·N + M·K) bytes BF16  — weight term dominates when M ≪ K
 
             <p>
                 Two secondary effects stand out in the trace. First, RoPE positional encoding shows a roughly 13×
-                CPU-to-GPU time ratio:
-                1.420 ms of self CPU time versus 104.960 µs of self CUDA time across 32 calls. The dominant
-                cost is the Triton runtime bookkeeping: each Triton launch triggers
-                <code>cudaOccupancyMaxActiveBlocksPerMultiprocessor</code>
-                and <code>cudaFuncSetAttribute</code> to select and configure the kernel at runtime, adding several
-                hundred microseconds of
-                pure host-side overhead that an AOT-compiled CUDA kernel would avoid. Second, the Q tensor passed to
-                FlashInfer's decode
-                wrapper is non-contiguous: it is a slice of a fused QKV projection output. Because the wrapper requires
-                a contiguous Q,
-                it calls <code>q.contiguous()</code>, which internally dispatches <code>aten::clone</code>. Across 32
-                layers this shows up
-                as roughly 281 µs per decode step from <code>aten::contiguous</code> plus <code>aten::clone</code>.
+                CPU-to-GPU time ratio: 1.420&nbsp;ms of self CPU time versus 104.960&nbsp;µs of self CUDA time across
+                32 calls (44&nbsp;µs CPU vs 3.3&nbsp;µs GPU per call). The GPU time is small because RoPE is a
+                lightweight elementwise op on a <code>[64, 32, 128]</code> tensor; any fixed dispatch cost dominates.
+                An AOT-compiled CUDA kernel would reduce this to a single <code>cudaLaunchKernel</code> call. Second,
+                the Q tensor passed to FlashInfer's decode wrapper is non-contiguous: it is a slice of a fused QKV
+                projection output. Because the wrapper requires a contiguous Q, it calls
+                <code>q.contiguous()</code>, which internally dispatches <code>aten::clone</code> to produce a copy.
+                Across 32 layers this shows up as roughly 281&nbsp;µs per decode step from
+                <code>aten::contiguous</code> (138&nbsp;µs CUDA total) plus <code>aten::clone</code>
+                (143&nbsp;µs CUDA total).
             </p>
 
 
