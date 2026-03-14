@@ -471,14 +471,11 @@ Memory ≈ 2 · (K·N + M·K) bytes BF16  — weight term dominates when M ≪ K
             </details>
 
             <p>
-                Nsight Compute confirms that the memory bandwidth throughput is lower than the compute throughput.
-                The predicted compute% (32%) vs observed (42%) gap is explained by L2 cache hits on the activation
-                matrix: [64, 4096] BF16 = 512 KB fits entirely in A100's 40 MB L2, so not all reads hit HBM, raising
-                the effective AI slightly above 64 F/B.
-                Memory throughput being "only" 51% can be explained with the 3-stage software pipeline in the
-                kernel (stages_64x3) thatoverlaps memory loads with tensor core math, so neither resource is fully
-                stalled
-                waiting for the other.
+                Nsight Compute confirms that the memory bandwidth throughput is much lower than the compute throughput.
+                Memory throughput being still "only" 66% can be explained with the 3-stage matrix multiplication
+                pipeline in
+                the kernel (stages_64x3) that overlaps memory loads with tensor core math, so neither resource is fully
+                stalled waiting for the other.
             </p>
             <figure>
                 <img src="sglang_bottlenecks/nsight_compute_gemm_bf16.png" alt="Nsight Compute — BF16 GEMM roofline"
