@@ -480,7 +480,7 @@ Memory ≈ 2 · (K·N + M·K) bytes BF16  — weight term dominates when M ≪ K
                 Memory throughput being "only" 51% can be explained with the 3-stage matrix multiplication pipeline in
                 the
                 kernel (stages_64x3) that overlaps memory loads with tensor core math, so neither resource is fully
-                stalled waiting for the other. Warp specialization is used to feed data to the tensor cores.
+                stalled waiting for the other.
             </p>
             <figure>
                 <img src="sglang_bottlenecks/nsight_compute_gemm_bf16.png" alt="Nsight Compute — BF16 GEMM roofline"
