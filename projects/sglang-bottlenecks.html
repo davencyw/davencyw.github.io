@@ -285,28 +285,72 @@
 
             <hr>
 
-            <h3>2.2 Profile BF16</h3>
+            <h3>2.2 Profile GPU Kernel Execution</h3>
+            <figure>
+                <img src="sglang_bottlenecks/nsight_bf16.png" alt="Nsight Systems trace — BF16 CUDA graphs disabled"
+                    style="width: 100%; border-radius: 4px;" class="zoomable"
+                    onclick="document.getElementById('lightbox').classList.add('active'); document.getElementById('lightbox-img').src=this.src;">
+                <figcaption>Nsight Systems trace for a single layer of the decode step (batch size 64). CUDA graphs
+                    disabled.
+                </figcaption>
+            </figure>
             <p>
                 I always like to take a look at NSIGHT System first to get a high-level overview of the GPU and kernel
                 usage. If we take a look at the profile, we clearly see that the kernels are far spread out over the
-                timeline indicating that the GPU is not fully utilised. This hints on potential CPU based
-                <label for="sn-cuda-graphs-gaps" class="sidenote-toggle sidenote-number">bottlenecks</label>
-                <input type="checkbox" id="sn-cuda-graphs-gaps" class="sidenote-toggle" />
-                <span class="sidenote">CUDA graphs are disabled here, but the visible gaps between kernels in the
-                    Nsight Systems timeline are not purely kernel-launch overhead. They are too big for them to only be
-                    launch overhead.</span>
-                and rises the question how we can utilise the GPU fully with this setup. So, let's take a look at the
-                Torch profiler output to get more insight on the CPU side as well.
+                timeline indicating that the GPU is not fully utilised. However, since we are profiling, CUDA graphs are
+                disabled. We know now how what kernels a decode layer executes and can compare this with the graph-based
+                execution to find out where the GPU is not fully utilised.
             </p>
             <figure>
-                <img src="sglang_bottlenecks/nsight_bf16.png" alt="Nsight Systems trace — BF16 baseline"
+                <img src="sglang_bottlenecks/nsight_bf16_cudagraphs.png" alt="Nsight Systems trace — BF16"
                     style="width: 100%; border-radius: 4px;" class="zoomable"
                     onclick="document.getElementById('lightbox').classList.add('active'); document.getElementById('lightbox-img').src=this.src;">
-                <figcaption>Nsight Systems trace for a single layer of the decode step (batch size 64, CUDA graphs
-                    disabled). Kernels
-                    are visibly spread out across the timeline.
+                <figcaption>Nsight Systems trace for a single layer of the decode step (batch size 64). CUDA graphs
+                    enabled show a more contiguous execution and less gaps between kernels.
                 </figcaption>
             </figure>
+            <p>
+                We can identify two sections with large gaps in the timeline even with CUDA graphs enabled.The first
+                gap is attributed to a bottleneck in paged attention:
+                One needs to compute the paged KV-cache index arrays that FlashInfer needs (indptr, last-page-len, slot
+                indices). This computation is data-dependent: which pages are assigned to each request changes every
+                step as sequences complete and new ones arrive. That dynamic Python computation happens on the CPU
+                between the two (piecewise) graph replays.
+                This is a fundamental bottleneck of paged attention, the index indirection is inherently dynamic.
+                The second gap is a sublayer boundary in the piecewise graph execution. There is a segment boundary
+                because the residual state needs to be routed through Python before the next segment starts and thus a
+                FusedAddRMSNorm happens between two segments.
+            </p>
+            <h4>A Note on Cuda Graphs</h4>
+            <p>
+                A CUDA graph is a static recording of GPU operations which you capture once, then replay it with a
+                single cudaGraphLaunch. Every input/output tensor address and
+                kernel parameter must be fixed at capture time. Any dynamic value (computed at runtime from request
+                data) breaks the capture.
+                SGLang's decode step can't be captured as one graph because some operations require runtime CPU data
+                (FlashInfer's KV page indices, which change as sequences arrive/finish). So instead it captures multiple
+                small, piecewise graphs:
+            <pre>
+┌─────────────────────────────────┐
+│  Segment 0 (one cudaGraphLaunch)│  ← pre-attention ops for all 32 layers
+│  qkv_proj, split, rope, store   │    captured once, replayed each step
+└────────────────┬────────────────┘
+                 │  CPU: builds FlashInfer page-table arrays
+                 │  (which sequences, which cache slots. Changes every step.)
+┌────────────────▼────────────────┐
+│  Segment 1 (one cudaGraphLaunch)│  ← attention
+│  create_kv_indices, BatchPrefill│
+└────────────────┬────────────────┘
+                 │  CPU: routes residual state
+┌────────────────▼────────────────┐
+│  Segment 2 (one cudaGraphLaunch)│  ← post-attention + FFN
+│  o_proj, norm, gate_up, silu,   │
+│  down, norm                     │
+└─────────────────────────────────┘
+                </pre>
+            </p>
+            <h3>2.2 Torch Profile</h3>
+
             <p>
                 The table below shows a representative slice of the Torch profiler output for a decode step with batch
                 size 64,
