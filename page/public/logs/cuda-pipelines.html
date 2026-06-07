@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUDA Pipelines</title>
+    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
+
+    <style>
+        #dark-mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 15px;
+            background-color: #565656;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background-color: rgba(100, 100, 100, 0.3);
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .tags {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body class="latex-dark">
+    <button id="dark-mode-toggle">Light Mode</button>
+    <script>
+        const toggleButton = document.querySelector("#dark-mode-toggle");
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle("latex-dark");
+            if (toggleButton.textContent == "Light Mode") {
+                toggleButton.textContent = "Dark Mode";
+                toggleButton.style.backgroundColor = "#e0e0e0";
+                toggleButton.style.color = "#333";
+            } else {
+                toggleButton.textContent = "Light Mode";
+                toggleButton.style.backgroundColor = "#565656";
+                toggleButton.style.color = "white";
+            }
+        });
+    </script>
+
+    <header>
+        <h1>CUDA Pipelines</h1>
+        <p class="author">Technical Log - June 2026</p>
+        <div class="tags">
+            <span class="tag">CUDA</span>
+            <span class="tag">GPU</span>
+            <span class="tag">Performance</span>
+            <span class="tag">Memory</span>
+        </div>
+    </header>
+
+    <div class="abstract">
+        <h2>Summary</h2>
+        <p>
+            Some CUDA kernels (like GEMM using Tensor Cores) are often staging-bound. CUDA pipelines,
+            built on Ampere's <code>cp.async</code> instructions and Hopper's Tensor Memory Accelerator (TMA), provide a
+            mechanism for overlapping data movement with computation. This note discusses the motivation behind pipelines, how they map to hardware, when they
+            provide measurable performance improvements, and validates the effect with a tensor-core GEMM benchmark on
+            H100.
+        </p>
+    </div>
+
+    <main>
+        <article>
+            <p>
+                Global memory accesses can take hundreds of cycles, making latency hiding one of the primary
+                challenges in kernel design. An MMA tile may finish in less
+                <label for="sn-wmma-tile" class="sidenote-toggle sidenote-number">than ten cycles</label>
+                while a global load still takes hundreds. For tensor-core kernels, staging is usually the bottleneck.
+                <input type="checkbox" id="sn-wmma-tile" class="sidenote-toggle" />
+                <span class="sidenote">Cycle counts aren't officially documented; see this
+                    <a href="https://forums.developer.nvidia.com/t/question-about-wgmma-instruction-in-hopper/311023">forums thread</a>
+                    for back-of-envelope WGMMA timing (~4 vs ~18 cycles for MACs vs shared-memory reads).</span>
+            </p>
+            <p>
+                CUDA pipelines, built on Ampere's asynchronous copy instructions, overlap data movement with
+                computation. The API is simple; the hard part is choosing enough pipeline depth to cover memory latency
+                without sacrificing occupancy through extra shared memory.
+            </p>
+
+            <h2>Motivation</h2>
+            <p>
+                A common pattern in CUDA kernels is tiled processing through shared memory:
+            </p>
+            <pre><code class="language-cpp">for (int tile = 0; tile &lt; num_tiles; tile++) {
+    load_tile_from_global_to_shared();
+
+    __syncthreads();
+
+    compute_on_tile();
+
+    __syncthreads();
+}</code></pre>
+            <p>
+                While this approach improves memory locality, it also creates a strict dependency chain. Computation
+                cannot begin until the entire tile has been loaded into shared memory. As a result, global memory
+                latency becomes visible to the execution pipeline.
+            </p>
+            <p>
+                Historically, loading data into shared memory required a two-step process:
+            </p>
+            <pre><code>Global Memory
+      ↓
+   Register
+      ↓
+ Shared Memory</code></pre>
+            <p>
+                Every thread first loads data into a register and then stores it into shared memory. Besides the
+                latency cost, this consumes registers that could otherwise be used for computation.
+            </p>
+            <p>
+                Ampere introduced hardware support for asynchronous copies from global memory directly into shared memory
+                through the <code>cp.async</code> instruction. CUDA exposes this functionality through
+                <code>cuda::memcpy_async</code> and <code>cuda::pipeline</code>, enabling software pipelining of memory
+                transfers and computation.
+            </p>
+            <p>
+                The goal is simple: while one tile is being processed, the next tile should already be moving through
+                the memory hierarchy.
+            </p>
+
+            <h2>The Pipeline Model</h2>
+            <p>
+                CUDA pipelines follow a producer-consumer model.
+            </p>
+            <p>
+                Instead of processing tiles sequentially, data movement and computation are overlapped:
+            </p>
+            <pre><code>         time ─────────────────────────→
+
+Copy     │ Tile 0 │ Tile 1 │ Tile 2 │ Tile 3 │
+Compute  │        │ Tile 0 │ Tile 1 │ Tile 2 │</code></pre>
+            <p>
+                The pipeline API exposes several key operations:
+            </p>
+            <pre><code class="language-cpp">pipeline.producer_acquire();
+
+cuda::memcpy_async(...);
+
+pipeline.producer_commit();
+
+pipeline.consumer_wait();
+
+compute();
+
+pipeline.consumer_release();</code></pre>
+            <p>
+                Conceptually, a pipeline behaves as a ring buffer of stages stored in shared memory.
+                The producer side fills future stages with incoming data while the consumer side processes previously
+                loaded stages.
+            </p>
+
+            <h2>Under the Hood: <code>cp.async</code></h2>
+            <p>
+                Ampere implements the direct global-to-shared path in hardware via PTX instructions such as:
+            </p>
+            <pre><code class="language-text">cp.async.ca.shared.global</code></pre>
+            <p>
+                Several benefits emerge:
+            </p>
+            <ul>
+                <li><strong>Reduced register pressure</strong>: Since data no longer passes through temporary registers, kernels often require fewer registers per thread. Lower register usage can increase occupancy and improve scheduling flexibility.</li>
+                <li><strong>Improved latency hiding</strong>: Asynchronous copies allow memory transactions to remain in flight while warps continue executing arithmetic instructions.</li>
+                <li><strong>Reduced scoreboard stalls</strong>: Traditional load instructions introduce dependencies that prevent subsequent instructions from executing until the data arrives. The asynchronous model delays synchronization until the data is actually required.</li>
+            </ul>
+            <p>
+                Async copies hide latency behind useful work; they do not remove the latency itself.
+            </p>
+            <p>
+                The effectiveness of the approach therefore depends heavily on the amount of computation available between
+                issuing a copy and consuming the data.
+            </p>
+
+            <h2>Choosing Pipeline Depth</h2>
+            <p>
+                The most important design decision is often the number of pipeline stages.
+            </p>
+
+            <h3>Double Buffering</h3>
+            <p>
+                The simplest configuration uses two stages:
+            </p>
+            <pre><code>Compute Tile N
+Load Tile N+1</code></pre>
+            <p>
+                This approach is easy to implement and requires relatively little shared memory.
+            </p>
+            <p>
+                For many kernels, double buffering is sufficient because the computation performed on a tile already
+                covers most of the memory latency.
+            </p>
+
+            <h3>Triple Buffering</h3>
+            <p>
+                Adding a third stage increases the distance between producer and consumer:
+            </p>
+            <pre><code>Compute Tile N
+Load Tile N+1
+Load Tile N+2</code></pre>
+            <p>
+                This can be beneficial when:
+            </p>
+            <ul>
+                <li>Memory latency is high</li>
+                <li>Tile compute is short relative to memory latency</li>
+                <li>Global memory bandwidth is not saturated</li>
+            </ul>
+            <p>
+                Triple buffering is common in high-performance GEMM implementations. The benchmark below uses three
+                stages for that reason.
+            </p>
+
+            <h3>Deeper Stages and Occupancy</h3>
+            <p>
+                Each stage multiplies shared-memory use: for tile size <code>T</code> bytes and depth <code>N</code>,
+                $$\text{Shared Memory} = N \times T$$
+                A kernel that previously held four blocks per SM may drop to two. Past some depth, occupancy loss
+                outweighs latency hiding. Pick a stage count suited to the workload.
+            </p>
+
+            <h2>Why Pipelines Sometimes Fail to Improve Performance</h2>
+            <p>
+                Async copies do not automatically speed up a kernel. Benefits appear only when latency is
+                <em>exposed</em> and disappear in two opposite regimes.
+            </p>
+
+            <h3>Insufficient Computation</h3>
+            <p>
+                Consider a kernel where tile computation only requires a handful of arithmetic instructions.
+            </p>
+            <pre><code>Copy
+Wait
+Compute
+Copy
+Wait
+Compute</code></pre>
+            <p>
+                The pipeline never becomes fully utilized because there is not enough work available to hide memory
+                latency.
+            </p>
+
+            <h3>Compute Too Fast, or Occupancy Already Hides Latency</h3>
+            <p>
+                At the other extreme, tensor-core GEMM finishes each tile so quickly that staging the next A/B tiles
+                becomes the bottleneck, even at high occupancy. cuBLAS and CUTLASS pipeline global-to-shared loads in
+                exactly this regime.
+            </p>
+            <p>
+                For bandwidth-bound streaming at full occupancy, software pipelining rarely helps. The kernel is
+                already DRAM-limited and the hardware scheduler is already switching warps.
+            </p>
+
+            <h3>Synchronization Placement</h3>
+            <p>
+                Issuing <code>memcpy_async</code> and immediately calling <code>consumer_wait</code> before compute
+                eliminates overlap. The copy must be issued far enough ahead of consumption for useful work to run in
+                between.
+            </p>
+
+            <h2>Warp Specialization and TMA</h2>
+            <p>
+                Warp specialization pushes overlap further by assigning fixed roles within a block, typically one
+                warpgroup as producer (TMA or <code>cp.async</code> loads) and another as consumer (WMMA or WGMMA).
+                Producer and consumer warpgroups advance through the pipeline concurrently instead of alternating
+                copy and compute in the same warps. That separation is what lets Hopper GEMM kernels sustain both
+                high memory throughput and high tensor-core utilization at the same time.
+            </p>
+            <p>
+                On Hopper, the Tensor Memory Accelerator (TMA) extends the same pipelining idea to bulk transfers:
+                a single thread issues <code>cp.async.bulk.tensor</code> to move an entire tile from global memory
+                into shared memory via a tensor map descriptor, coordinated with mbarriers rather than per-thread
+                <code>cp.async</code> loops. Production library kernels rely on TMA for this staging layer because it
+                cuts register pressure and keeps the copy path off the execution units that run matrix math.
+            </p>
+
+
+            <h2>An Experiment: Pipelining a Tensor-Core GEMM</h2>
+            <p>
+                To put these ideas on concrete numbers, I benchmarked a tiled FP16 GEMM
+                (<code>C = A · B</code>, FP32 accumulate) on an H100 against a synchronous baseline. The block tile is
+                <code>128×128</code>, K is streamed in chunks of 16, and A/B tiles are staged through shared memory
+                with 128-bit loads. The pipelined variant uses <code>cuda::pipeline</code> with three stages. Results and
+                kernels are in
+                <a href="https://github.com/davencyw/tlog-cuda-pipeline">tlog-cuda-pipeline</a>.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kernel</th>
+                        <th>N = 4096 (TFLOP/s)</th>
+                        <th>Speedup</th>
+                        <th>N = 8192 (TFLOP/s)</th>
+                        <th>Speedup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>sync</td>
+                        <td>65.5</td>
+                        <td>1.00×</td>
+                        <td>65.2</td>
+                        <td>1.00×</td>
+                    </tr>
+                    <tr>
+                        <td>cuda::pipeline</td>
+                        <td>83.6</td>
+                        <td>1.28×</td>
+                        <td>85.1</td>
+                        <td>1.31×</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                A three-stage <code>cuda::pipeline</code> delivers a consistent ~1.28–1.31× over synchronous staging.
+                The pipelined kernel is verified against the baseline (cross-checked against a CPU reference at small
+                <code>N</code>). These are teaching kernels: they omit register double-buffering, swizzling, and epilogue
+                tricks a production GEMM uses, so absolute TFLOP/s (~80–85) sits well below cuBLAS. The pipelining
+                effect is still isolated.
+            </p>
+
+            <!-- <h3>WGMMA: A Different Regime</h3>
+            <p>
+                The WGMMA path in the same harness is structurally different from the WMMA comparison above. It uses
+                <code>BK = 64</code> (required for
+                <label for="sn-swizzle" class="sidenote-toggle sidenote-number">128B swizzle</label>),
+                <input type="checkbox" id="sn-swizzle" class="sidenote-toggle" />
+                <span class="sidenote">Hopper TMA can remap how tiles land in shared memory via a 128-byte swizzle
+                    pattern (<code>CU_TENSOR_MAP_SWIZZLE_128B</code>). Within each 128B chunk, elements are permuted
+                    so concurrent WGMMA loads hit different shared-memory banks instead of colliding. For FP16 that
+                    fixes the tile K extent at 64 (64 × 2 bytes = 128B per swizzle unit). Naive row/column staging
+                    without swizzling often creates bank conflicts that cap tensor-core throughput.</span>
+                TN layout (<code>A</code> row-major M×K,
+                <code>B</code> transposed to N×K on the host), and <strong>warp specialization</strong>: warpgroup 0
+                issues TMA bulk loads while warpgroup 1 runs <code>m64n128k16</code> WGMMA. Producer and consumer
+                roles are split across warpgroups rather than sequenced within the same warps.
+            </p>
+            <p>
+                WGMMA with swizzled TMA staging reaches much higher TFLOP/s than the WMMA kernels above. The table
+                below shows where a multi-stage TMA pipeline still adds headroom:
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kernel</th>
+                        <th>N = 4096 (TFLOP/s)</th>
+                        <th>Speedup</th>
+                        <th>N = 8192 (TFLOP/s)</th>
+                        <th>Speedup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>WGMMA no pipe</td>
+                        <td>366.2</td>
+                        <td>1.00×</td>
+                        <td>480.8</td>
+                        <td>1.00×</td>
+                    </tr>
+                    <tr>
+                        <td>TMA+WGMMA</td>
+                        <td>494.5</td>
+                        <td>1.35×</td>
+                        <td>480.3</td>
+                        <td>1.00×</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Speedups are vs the single-stage WGMMA kernel. At N = 8192, pipelined and non-pipelined paths
+                converge (~480 TFLOP/s). WGMMA uses f16 accumulators, so error vs the f32 WMMA reference reflects
+                lower precision in the accumulator.
+            </p> -->
+
+            <h2>Conclusion</h2>
+            <p>
+                CUDA pipelines hide global memory latency by keeping copies in flight while compute runs when that
+                latency is exposed. On an H100 WMMA GEMM, three stages of <code>cuda::pipeline</code> gave a reliable
+                ~1.3× over synchronous staging.
+                gain.
+            </p>
+
+            <h2>References</h2>
+            <ol>
+                <li>
+                    David Blum, <em>tlog-cuda-pipeline: Pipelining a Tensor-Core GEMM</em>.
+                    <a href="https://github.com/davencyw/tlog-cuda-pipeline">github.com/davencyw/tlog-cuda-pipeline</a>
+                </li>
+                <li>
+                    NVIDIA Developer Blog, <em>Controlling Data Movement to Boost Performance on Ampere Architecture</em>.
+                    <a href="https://developer.nvidia.com/blog/controlling-data-movement-to-boost-performance-on-ampere-architecture/">developer.nvidia.com/blog/controlling-data-movement-to-boost-performance-on-ampere-architecture/</a>
+                </li>
+                <li>
+                    NVIDIA, <em>Ampere GPU Architecture Tuning Guide</em>.
+                    <a href="https://docs.nvidia.com/cuda/ampere-tuning-guide/">docs.nvidia.com/cuda/ampere-tuning-guide/</a>
+                </li>
+                <li>
+                    NVIDIA, <em>Hopper Architecture In-Depth</em>.
+                    <a href="https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/">developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/</a>
+                </li>
+                <li>
+                    NVIDIA, <em>PTX ISA Documentation</em> (cp.async).
+                    <a href="https://docs.nvidia.com/cuda/parallel-thread-execution/">docs.nvidia.com/cuda/parallel-thread-execution/</a>
+                </li>
+                <li>
+                    NVIDIA CUTLASS Team, <em>Efficient GEMM</em>.
+                    <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cpp/efficient_gemm.md">github.com/NVIDIA/cutlass/blob/main/media/docs/cpp/efficient_gemm.md</a>
+                </li>
+                <li>
+                    Colfax Research, <em>CUTLASS Tutorial: Design of a GEMM Kernel</em>.
+                    <a href="https://research.colfax-intl.com/cutlass-tutorial-design-of-a-gemm-kernel/">research.colfax-intl.com/cutlass-tutorial-design-of-a-gemm-kernel/</a>
+                </li>
+                <li>
+                    DeepWiki, <em>FMHA Pipeline Coordination and Warp Specialization</em> (CUTLASS).
+                    <a href="https://deepwiki.com/NVIDIA/cutlass/6.4-fmha-pipeline-coordination-and-warp-specialization">deepwiki.com/NVIDIA/cutlass/6.4-fmha-pipeline-coordination-and-warp-specialization</a>
+                </li>
+                <li>
+                    DeepWiki, <em>CUTLASS SM90 MMA Abstractions</em>.
+                    <a href="https://deepwiki.com/NVIDIA/cutlass/7.1-mma-abstractions">deepwiki.com/NVIDIA/cutlass/7.1-mma-abstractions</a>
+                </li>
+                <li>
+                    DeepWiki, <em>SM90 TMA Warp-Specialized GEMM</em> (CUTLASS).
+                    <a href="https://deepwiki.com/NVIDIA/cutlass/4.2-sm90-tma-warp-specialized-gemm">deepwiki.com/NVIDIA/cutlass/4.2-sm90-tma-warp-specialized-gemm</a>
+                </li>
+            </ol>
+        </article>
+    </main>
+</body>
+
+</html>
