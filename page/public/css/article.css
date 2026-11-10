@@ -1,0 +1,438 @@
+/* Long form pages: logs and project write ups. Builds on /css/site.css. */
+
+body.article {
+    counter-reset: sidenote figure;
+}
+
+.article-wrap {
+    max-width: calc(1008px + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: calc(var(--s-900) + var(--s-700)) var(--gutter) var(--s-700);
+}
+
+.article-wrap > header,
+.article-wrap > .author,
+.article-wrap > .abstract,
+.article-wrap > main,
+.article-wrap > .crumb-row,
+.article-wrap > .full-width-banner {
+    max-width: 680px;
+}
+
+.crumb-row {
+    margin-bottom: var(--s-600);
+}
+
+.crumb-row .link-arrow .icon {
+    order: -1;
+}
+
+.crumb-row .link-arrow:hover .icon {
+    transform: translateX(-2px);
+}
+
+/* Work in progress notice */
+.full-width-banner {
+    margin-bottom: var(--s-400);
+    padding: var(--s-100) var(--s-200);
+    border: 1px dashed var(--rule-strong);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+}
+
+.full-width-banner i {
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* ---- Header ------------------------------------------------------------ */
+
+.article-wrap > header h1 {
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    background: linear-gradient(90deg, var(--heading-from), var(--heading-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-bottom: var(--s-50);
+}
+
+.author {
+    margin: var(--s-300) 0 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+header .tags {
+    margin-top: var(--s-200);
+}
+
+/* ---- Abstract, framed like a plate ------------------------------------- */
+
+.abstract {
+    position: relative;
+    margin: var(--s-600) 0 var(--s-700);
+    padding: var(--s-75);
+    border: 1px solid var(--rule-strong);
+}
+
+.abstract > p {
+    display: block;
+    padding: var(--s-400) var(--s-300) var(--s-300);
+    border: 1px solid var(--rule-strong);
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.abstract > br {
+    display: none;
+}
+
+.abstract h2 {
+    position: absolute;
+    top: calc(-1 * var(--s-100));
+    left: var(--s-300);
+    margin: 0;
+    padding: 0 var(--s-75);
+    background: var(--bg);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 24px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background-color var(--dur) var(--ease);
+}
+
+/* ---- Body copy --------------------------------------------------------- */
+
+article {
+    font-size: 18px;
+    line-height: 28px;
+}
+
+article p {
+    margin: 0 0 var(--s-300);
+}
+
+article h2 {
+    margin: var(--s-700) 0 var(--s-300);
+    font-size: 30px;
+    line-height: 36px;
+    letter-spacing: -0.02em;
+}
+
+article h3 {
+    margin: var(--s-500) 0 var(--s-200);
+    font-size: 20px;
+    line-height: 28px;
+}
+
+article h4 {
+    margin: var(--s-400) 0 var(--s-200);
+    font-size: 18px;
+    line-height: 28px;
+}
+
+article strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+article em {
+    font-style: normal;
+    color: var(--ink);
+}
+
+article a,
+.abstract a,
+.sidenote a {
+    color: var(--ink);
+    text-decoration-color: var(--muted);
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
+    transition: text-decoration-color var(--dur) var(--ease);
+}
+
+article a:hover,
+.abstract a:hover {
+    text-decoration-color: var(--ink);
+}
+
+article ul,
+article ol {
+    margin: 0 0 var(--s-300);
+    padding-left: var(--s-300);
+}
+
+article li {
+    margin-bottom: var(--s-75);
+}
+
+article li::marker {
+    color: var(--muted);
+    font-family: var(--mono);
+}
+
+/* ---- Code -------------------------------------------------------------- */
+
+code {
+    font-family: var(--mono);
+    font-size: 0.875em;
+    color: var(--ink);
+}
+
+:not(pre) > code {
+    padding: 0 var(--s-50);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+    overflow-wrap: anywhere;
+}
+
+pre {
+    margin: 0 0 var(--s-300);
+    padding: var(--s-200);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    background: var(--surface) !important;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 20px;
+    tab-size: 4;
+}
+
+pre code {
+    font-size: 14px;
+    background: none;
+    text-shadow: none;
+}
+
+/* Prism tokens, engraved in ink tones only */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: var(--muted);
+}
+
+.token.keyword,
+.token.builtin,
+.token.important,
+.token.directive,
+.token.macro {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.token.string,
+.token.char,
+.token.attr-value {
+    color: var(--ink-2);
+    text-decoration: underline dotted var(--rule);
+    text-underline-offset: 3px;
+}
+
+.token.number,
+.token.boolean,
+.token.constant {
+    color: var(--ink);
+}
+
+.token.function,
+.token.class-name {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+.token.operator,
+.token.punctuation {
+    color: var(--muted);
+}
+
+/* ---- Tables ------------------------------------------------------------ */
+
+table {
+    display: block;
+    max-width: 100%;
+    margin: 0 0 var(--s-300);
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+th,
+td {
+    padding: var(--s-75) var(--s-200) var(--s-75) 0;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    border-bottom-color: var(--rule-strong);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+}
+
+td {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- Figures ----------------------------------------------------------- */
+
+figure {
+    margin: var(--s-500) 0;
+    counter-increment: figure;
+}
+
+figure img {
+    width: 100%;
+    padding: var(--s-75);
+    border: 1px solid var(--rule-strong);
+    background: #FFFFFF;
+    outline: 1px solid var(--rule-strong);
+    outline-offset: calc(-1 * var(--s-75) - 1px);
+}
+
+figcaption {
+    margin-top: var(--s-75);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--muted);
+}
+
+figcaption::before {
+    content: "Fig. " counter(figure) " · ";
+    color: var(--ink);
+}
+
+/* ---- Footnotes --------------------------------------------------------- */
+
+.footnotes {
+    margin-top: var(--s-700);
+    padding-top: var(--s-300);
+    border-top: 1px solid var(--rule-strong);
+}
+
+.footnotes p {
+    margin-bottom: var(--s-75);
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--muted);
+}
+
+/* ---- Sidenotes --------------------------------------------------------- */
+
+input.sidenote-toggle {
+    display: none;
+}
+
+label.sidenote-number {
+    counter-increment: sidenote;
+    cursor: pointer;
+    text-decoration: underline dotted var(--muted);
+    text-underline-offset: 4px;
+}
+
+label.sidenote-number::after {
+    content: counter(sidenote);
+    margin-left: 1px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 0;
+    vertical-align: super;
+    color: var(--ink);
+}
+
+.sidenote {
+    float: right;
+    clear: right;
+    position: relative;
+    width: 280px;
+    margin: var(--s-25) -328px var(--s-200) 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--muted);
+}
+
+.abstract .sidenote {
+    margin-right: calc(-328px - var(--s-300) - var(--s-75) - 2px);
+}
+
+.sidenote::before {
+    content: counter(sidenote) " ";
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink);
+}
+
+@media (max-width: 1100px) {
+    .sidenote {
+        display: none;
+    }
+
+    .sidenote-toggle:checked + .sidenote {
+        display: block;
+        float: none;
+        width: auto;
+        margin: var(--s-100) 0;
+        padding: var(--s-100) var(--s-200);
+        border: 1px solid var(--rule);
+        background: var(--surface);
+    }
+
+    .abstract .sidenote-toggle:checked + .sidenote {
+        margin-right: 0;
+    }
+}
+
+/* ---- MathJax ----------------------------------------------------------- */
+
+mjx-container {
+    color: var(--ink);
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* ---- Small screens ----------------------------------------------------- */
+
+@media (max-width: 640px) {
+    .article-wrap {
+        padding-top: calc(var(--s-900) + var(--s-400));
+    }
+
+    .article-wrap > header h1 {
+        font-size: 36px;
+        line-height: 40px;
+    }
+
+    article {
+        font-size: 16px;
+        line-height: 24px;
+    }
+
+    article h2 {
+        margin-top: var(--s-600);
+        font-size: 24px;
+        line-height: 32px;
+    }
+
+    .abstract > p {
+        padding: var(--s-300) var(--s-200) var(--s-200);
+    }
+}

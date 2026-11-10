@@ -4,198 +4,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>David Blum</title>
-    <link rel="stylesheet" href="src/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    <title>David Blum · Research Engineer</title>
+    <meta name="description"
+        content="David Blum, research engineer. Projects and technical logs on GPU kernels, numerics and machine learning systems.">
+    <link rel="canonical" href="https://www.davencyw.net/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="David Blum · Research Engineer">
+    <meta property="og:description" content="Research engineering on GPUs: projects and technical logs on CUDA, numerics and ML systems.">
+    <meta property="og:url" content="https://www.davencyw.net/">
+    <meta property="og:image" content="https://www.davencyw.net/og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#F2EEE5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#131209" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+    <script>
+        (function () {
+            var d = document.documentElement, t = null;
+            try { t = localStorage.getItem('theme'); } catch (e) { }
+            if (t) d.setAttribute('data-theme', t);
+            d.setAttribute('data-theme-effective', t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+            d.classList.add('js');
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Pirata+One&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/src/style.css">
 </head>
 
 <body>
-    <div class="custom-cursor"></div>
-    <!-- <div id="loading-screen">
-        <h1 id="name">David Blum</h1>
-    </div> -->
+    <a class="skip-link" href="#main">Skip to content</a>
 
-    <div id="main-content">
-        <div class="outer-container">
-            <div class="container">
-                <footer>
-                    <p>Reach out to me on <a href="https://www.linkedin.com/in/davencyw/">LinkedIn</a> or send me
-                        an <a href="mailto:david@schmidig.net">email</a>.</p>
-                </footer>
-                <!-- <footer-left>
-                    <p><a href="about.html">About</a></p>
-                </footer-left> -->
-                <canvas id="threejs-background"></canvas>
-                <script>
-                    // Immediately set background opacity if splash was already seen (prevents flash)
-                    if (sessionStorage.getItem('hasSeenSplash')) {
-                        document.getElementById('threejs-background').style.opacity = 0.1;
-                        document.getElementById('threejs-background').classList.add('below-content');
-                    }
-                </script>
-                <div class="inner-box">
-                    <div id="hero-section">
-                        <div id="title">
-                            <h1>David Blum</h1>
-                            <h2 id="subtitle">ML / CUDA Engineer</h2>
-                            </br>
-                            <p><a href=" #" id="toggle-more">[about]</a></p>
-                        </div>
-                        <div id="extra-info" class="extra-info">
-                            <button id="close-extra-info" class="close-btn">[x]</button>
-                            <h2>About Me</h2> </br>
-                            <p>
-                                I am a Senior AI/ML and CUDA Engineer with a deep passion for creating cutting-edge
-                                solutions in
-                                computer vision, real-time AI systems, and scalable deep learning applications. With a
-                                strong foundation in advanced algorithm design and optimization, I have honed my
-                                expertise
-                                in bridging state-of-the-art research with practical, production-ready systems. My
-                                career is
-                                defined by a drive to solve complex challenges while fostering innovation and
-                                collaboration
-                                within diverse teams.
-                            </p>
-                            <br>
-                            <br>
-                            <p>
-                                Over the years, I have successfully led cross-functional teams, guiding the development
-                                of
-                                sub-second human skeletal pose tracking systems, multi-modal human skeleton pose
-                                optimization, and
-                                action recognition pipelines. These projects required not only strong technical
-                                expertise
-                                but also a meticulous focus on building scalable, maintainable, and high-performance
-                                software. I take pride in delivering robust solutions that integrate seamlessly into
-                                production environments, ensuring reliability, efficiency, and long-term value.
-                            </p>
-                            <br>
-                            <br>
-                            <p>
-                                With over 10 years of experience in C++ and Python, I am proficient in a wide range of
-                                tools
-                                and libraries, including high-performance computing frameworks (OpenMP, BLAS, Eigen,
-                                Ceres,
-                                Boost, TBB), GPGPU programming (CUDA, CuDNN), and deep learning frameworks (PyTorch,
-                                OpenCV,
-                                numpy, pandas, matplotlib/seaborn, scipy). My expertise extends to orchestration tools
-                                such
-                                as Union/Flyte and MLflow, which I leverage to streamline development, enable
-                                reproducibility, and ensure scalability in AI workflows.
-                            </p>
-                            <br>
-                            <br>
-                            <br>
-                            <h2>My Motivation</h2> </br>
-                            <p>
-                                At the core of my work is a passion for transforming state-of-the-art research into
-                                tangible, high-quality products. I am inspired by the process of unraveling complex
-                                problems
-                                and translating innovative ideas into systems that deliver measurable impact. My
-                                ultimate
-                                goal is to bridge the gap between academic excellence and industrial applicability,
-                                ensuring
-                                that the solutions I help create are both cutting-edge and practical.
-                            </p>
-                        </div>
-                        <div class="scroll-indicator"
-                            onclick="document.getElementById('content-sections').scrollIntoView({behavior: 'smooth'})">
-                            <span class="scroll-arrow"></span>
-                        </div>
-                    </div>
-                    <div id="content-sections">
-                        <!-- Projects Section -->
-                        <div id="projects-section" class="content-row">
-                            <div class="section-header">
-                                <h2>Projects</h2>
-                                <a href="projects.html" class="view-all-link">view all</a>
-                            </div>
-                            <div class="projects-grid">
+    <div class="nav-sentinel" aria-hidden="true"></div>
+    <header class="site-nav" data-reveal-on-scroll>
+        <nav class="nav-pill" aria-label="Primary">
+            <a class="nav-home" href="/" aria-current="page">David Blum</a>
+            <ul class="nav-links">
+                <li><a href="/#work" data-section="work">Work</a></li>
+                <li><a href="/#logs" data-section="logs">Logs</a></li>
+                <li><a href="/#about" data-section="about">About</a></li>
+            </ul>
+            <button class="icon-btn theme-toggle" type="button" aria-label="Switch between light and dark theme">
+                <svg class="icon icon-sun" aria-hidden="true"><use href="/img/icons.svg#sun" /></svg>
+                <svg class="icon icon-moon" aria-hidden="true"><use href="/img/icons.svg#moon" /></svg>
+            </button>
+            <button class="icon-btn nav-burger" type="button" aria-expanded="false" aria-controls="nav-overlay"
+                aria-label="Open menu"><span></span><span></span></button>
+        </nav>
+        <div class="nav-overlay" id="nav-overlay">
+            <ul>
+                <li><a href="/#work"><span class="eyebrow">01</span>Work</a></li>
+                <li><a href="/#logs"><span class="eyebrow">02</span>Logs</a></li>
+                <li><a href="/#about"><span class="eyebrow">03</span>About</a></li>
+            </ul>
+        </div>
+    </header>
 
-                                <!-- <a href="projects/long-arithmetic-tensorcores.html" class="project-card">
-                                    <div class="project-image">
-                                        <img src="projects/long_arithmetic_tensorcores/preview.png"
-                                            alt="Long Arithmetic TensorCores">
-                                    </div>
-                                    <div class="project-card-info">
-                                        <span class="project-card-date">Apr 2026 — WIP</span>
-                                        <span class="project-card-title">Accelerating Long Arithmetic with
-                                            TensorCores</span>
-                                    </div>
-                                </a> -->
+    <main id="main">
+        <!-- Hero -->
+        <section class="hero wrap" aria-labelledby="hero-title">
+            <div class="hero-copy">
+                <h1 class="hero-name" id="hero-title" data-reveal>David<br> Blum</h1>
+                <p class="hero-role" data-reveal style="--delay: 80ms">Research Engineer</p>
+                <p class="hero-sub" data-reveal style="--delay: 160ms">
+                    Research engineering on GPUs: kernels, numerics and the machine learning systems built on top of
+                    them. This is where I keep my projects and technical notes.
+                </p>
+                <div class="hero-actions" data-reveal style="--delay: 240ms">
+                    <a class="link-arrow" href="/projects.html">Projects
+                        <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                    </a>
+                    <a class="link-arrow" href="/logs.html">Technical logs
+                        <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                    </a>
+                    <a class="link-arrow" href="#about">About
+                        <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                    </a>
+                </div>
+            </div>
 
+            <figure class="plate hero-plate" data-reveal style="--delay: 200ms">
+                <span class="plate-label">Pl. I</span>
+                <div class="plate-inner">
+                    <canvas id="plate" role="img"
+                        aria-label="An animated table of Lissajous figures drawn as an engraving, frequencies one to three across and one to four down."></canvas>
+                </div>
+                <figcaption>x = sin(at + φ), y = sin(bt)</figcaption>
+            </figure>
+        </section>
 
-                                <a href="projects/paperviewer.html" class="project-card">
-                                    <div class="project-image">
-                                        <img src="projects/paperviewer/preview.png" alt="Paper Viewer">
-                                    </div>
-                                    <div class="project-card-info">
-                                        <span class="project-card-date">Jan 2025</span>
-                                        <span class="project-card-title">Cutting Through the Noise - Automated AI Paper
-                                            Curation</span>
-                                    </div>
-                                </a>
-                                <!-- Additional project cards (max 3) -->
-                            </div>
-                        </div>
-
-                        <!-- Technical Logs Section -->
-                        <div id="logs-section" class="content-row">
-                            <div class="section-header">
-                                <h2>Technical Logs</h2>
-                                <a href="logs.html" class="view-all-link">archive</a>
-                            </div>
-                            <div class="logs-grid">
-                                <a href="logs/cuda-pipelines.html" class="log-entry">
-                                    <div class="log-date">Jun 2026</div>
-                                    <div class="log-title">CUDA Pipelines</div>
-                                    <div class="log-tags">
-                                        <span class="tag">CUDA</span>
-                                        <span class="tag">GPU</span>
-                                        <span class="tag">Performance</span>
-                                        <span class="tag">Memory</span>
-                                    </div>
-                                </a>
-
-                                <a href="logs/gpu-tees.html" class="log-entry">
-                                    <div class="log-date">Mar 2026</div>
-                                    <div class="log-title">Moving a Distributed GPU Service into TEEs</div>
-                                    <div class="log-tags">
-                                        <span class="tag">GPU</span>
-                                        <span class="tag">Security</span>
-                                        <span class="tag">CUDA</span>
-                                        <span class="tag">TEE</span>
-                                    </div>
-                                </a>
-
-                                <a href="logs/code-is-cheap.html" class="log-entry">
-                                    <div class="log-date">Feb 2026</div>
-                                    <div class="log-title">Code Is Cheap Now. Engineering Isn't.</div>
-                                    <div class="log-tags">
-                                        <span class="tag">Development</span>
-                                        <span class="tag">Tools</span>
-                                        <span class="tag">AI</span>
-                                    </div>
-                                </a>
-
-                                <!-- Add more log entries here for max 4 total -->
-                            </div>
-                        </div>
-                    </div>
-
+        <!-- Work -->
+        <section id="work" class="section" aria-labelledby="work-title">
+            <div class="wrap">
+                <div class="section-head" data-reveal>
+                    <h2 id="work-title">Selected work</h2>
+                    <span class="rule" aria-hidden="true"></span>
+                    <a class="link-arrow" href="/projects.html">All projects
+                        <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                    </a>
                 </div>
 
+                <div class="projects">
+                    <!-- <a href="/projects/long-arithmetic-tensorcores.html" class="project" data-reveal>
+                        <figure class="plate">
+                            <span class="plate-label">Pl. II</span>
+                            <div class="plate-inner">
+                                <img src="/projects/long_arithmetic_tensorcores/preview.webp" loading="lazy"
+                                    alt="Engraving of a hand moving beads on a wooden abacus">
+                            </div>
+                        </figure>
+                        <div class="project-meta">
+                            <span class="eyebrow">Apr 2026 · In progress</span>
+                            <h3>Accelerating long arithmetic with TensorCores</h3>
+                            <p>Repurposing GPU TensorCore matrix engines for high throughput multi limb integer
+                                arithmetic.</p>
+                            <ul class="tags">
+                                <li class="tag">CUDA</li>
+                                <li class="tag">TensorCores</li>
+                                <li class="tag">Arithmetic</li>
+                            </ul>
+                            <span class="link-arrow">Read the write up
+                                <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                            </span>
+                        </div>
+                    </a> -->
+
+                    <a href="/projects/paperviewer.html" class="project" data-reveal>
+                        <figure class="plate">
+                            <span class="plate-label">Pl. II</span>
+                            <div class="plate-inner">
+                                <img src="/projects/paperviewer/preview.webp" loading="lazy"
+                                    alt="Engraving of giant shears cutting through a cloud of letters beside a cart of sealed parcels">
+                            </div>
+                        </figure>
+                        <div class="project-meta">
+                            <span class="eyebrow">Jan 2025</span>
+                            <h3>Cutting through the noise</h3>
+                            <p>Automated AI paper curation. A fine tuned classifier, a generative model that invents
+                                papers to probe my taste, and RLHF to close the loop, so only the relevant work reaches
+                                my reading list.</p>
+                            <ul class="tags">
+                                <li class="tag">LLMs</li>
+                                <li class="tag">RLHF</li>
+                                <li class="tag">Classification</li>
+                            </ul>
+                            <span class="link-arrow">Read the write up
+                                <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Logs -->
+        <section id="logs" class="section" aria-labelledby="logs-title">
+            <div class="wrap">
+                <div class="section-head" data-reveal>
+                    <h2 id="logs-title">Technical logs</h2>
+                    <span class="rule" aria-hidden="true"></span>
+                    <a class="link-arrow" href="/logs.html">Archive
+                        <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                    </a>
+                </div>
+
+                <ul class="toc" data-reveal>
+                    <li>
+                        <a href="/logs/cuda-pipelines.html">
+                            <span class="toc-date">Jun 2026</span>
+                            <span class="toc-title">CUDA Pipelines</span>
+                            <span class="tags"><span class="tag">CUDA</span><span class="tag">GPU</span><span
+                                    class="tag">Memory</span></span>
+                            <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-right" /></svg>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logs/gpu-tees.html">
+                            <span class="toc-date">Mar 2026</span>
+                            <span class="toc-title">Moving a distributed GPU service into TEEs</span>
+                            <span class="tags"><span class="tag">GPU</span><span class="tag">Security</span><span
+                                    class="tag">TEE</span></span>
+                            <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-right" /></svg>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logs/code-is-cheap.html">
+                            <span class="toc-date">Feb 2026</span>
+                            <span class="toc-title">Code is cheap now. Engineering isn't.</span>
+                            <span class="tags"><span class="tag">AI</span><span class="tag">Tools</span></span>
+                            <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-right" /></svg>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- About -->
+        <section id="about" class="section" aria-labelledby="about-title">
+            <div class="wrap">
+                <div class="section-head" data-reveal>
+                    <h2 id="about-title">About</h2>
+                    <span class="rule" aria-hidden="true"></span>
+                </div>
+
+                <div class="about-copy" data-reveal>
+                    <p><span class="dropcap"><span>I</span></span> am a research engineer working mostly on ML and GPUs. The part of the work I
+                        enjoy most is taking a method from a paper and making it real: reading the math, finding where
+                        the time actually goes, and writing the kernel or pipeline that makes it practical.</p>
+                    <p>Over the years I have led teams working on <strong>sub second human skeletal pose
+                            tracking</strong>, multi modal pose optimization and action recognition. Most of my time
+                        goes into C++, Python and CUDA, and into keeping those systems maintainable once they leave the
+                        lab.</p>
+                    <p>This page is where I write things down: short technical logs on whatever I am digging into,
+                        and longer write ups of side projects.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="fleuron" aria-hidden="true">
+                <svg viewBox="0 0 40 12"><path d="M20 1l5 5-5 5-5-5z" /><path d="M20 4l2 2-2 2-2-2z" fill="currentColor" /></svg>
+            </div>
+            <div class="footer-row">
+                <div class="footer-brand">
+                    <span>© <span data-year>2026</span> David Blum · No cookies, no tracking</span>
+                </div>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/davencyw"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#github-logo" /></svg>GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/davencyw/"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#linkedin-logo" /></svg>LinkedIn</a></li>
+                    <li><a href="mailto:david@schmidig.net"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#envelope-simple" /></svg>Email</a></li>
+                </ul>
             </div>
         </div>
+    </footer>
 
-        <script type="module" src="src/main.js"></script>
-
-        <script type="module" src="src/lissajous.js"></script>
-        <!-- <script type="module" src="src/delauney.js"></script> -->
-        <!-- <script type="module" src="src/box.js"></script> -->
-
-
+    <script src="/js/site.js" defer></script>
+    <script type="module" src="/src/plate.js"></script>
 </body>
 
 </html>

@@ -4,198 +4,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects - David Blum</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    <title>Projects · David Blum</title>
+    <meta name="description" content="Project write ups by David Blum: ML systems, GPU computing and research engineering.">
+    <meta property="og:title" content="Projects · David Blum">
+    <meta property="og:description" content="Project write ups by David Blum: ML systems, GPU computing and research engineering.">
+    <meta property="og:image" content="https://www.davencyw.net/og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#F2EEE5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#131209" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+    <script>
+        (function () {
+            var d = document.documentElement, t = null;
+            try { t = localStorage.getItem('theme'); } catch (e) { }
+            if (t) d.setAttribute('data-theme', t);
+            d.setAttribute('data-theme-effective', t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+            d.classList.add('js');
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            background: rgb(18, 18, 18);
-            font-family: 'Space Grotesk', sans-serif;
-            min-height: 100vh;
-            color: rgb(200, 200, 200);
-        }
-
-        .page-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 60px 40px;
-        }
-
-        .back-link {
-            display: inline-block;
-            font-size: 13px;
-            color: rgb(120, 120, 120);
-            text-decoration: none;
-            margin-bottom: 40px;
-            transition: color 0.2s ease;
-        }
-
-        .back-link:hover {
-            color: rgb(200, 200, 200);
-        }
-
-        h1 {
-            font-size: 32px;
-            font-weight: 600;
-            color: rgb(255, 255, 255);
-            margin-bottom: 40px;
-            letter-spacing: -0.5px;
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .project-card {
-            display: block;
-            text-decoration: none;
-            border: 1px solid rgba(73, 73, 73, 0.3);
-            border-radius: 8px;
-            background-color: rgba(30, 30, 30, 0.4);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .project-card:hover {
-            border-color: rgba(100, 100, 100, 0.6);
-            background-color: rgba(40, 40, 40, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .project-image {
-            width: 100%;
-            aspect-ratio: 16 / 10;
-            overflow: hidden;
-            background-color: rgba(20, 20, 20, 0.5);
-        }
-
-        .project-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.85;
-            filter: grayscale(100%);
-            transition: opacity 0.3s ease, filter 0.3s ease;
-        }
-
-        .project-card:hover .project-image img {
-            opacity: 1;
-            filter: grayscale(100%);
-        }
-
-        .project-content {
-            padding: 16px 18px;
-        }
-
-        .project-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: rgb(230, 230, 230);
-            margin-bottom: 6px;
-            line-height: 1.3;
-        }
-
-        .project-card:hover .project-title {
-            color: rgb(255, 255, 255);
-        }
-
-        .project-description {
-            font-size: 13px;
-            color: rgb(150, 150, 150);
-            line-height: 1.4;
-            margin-bottom: 10px;
-        }
-
-        .project-card:hover .project-description {
-            color: rgb(180, 180, 180);
-        }
-
-        .project-year {
-            font-size: 11px;
-            color: rgb(100, 100, 100);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 60px 20px;
-            color: rgb(100, 100, 100);
-            font-size: 14px;
-        }
-
-        @media screen and (max-width: 768px) {
-            .page-container {
-                padding: 40px 20px;
-            }
-
-            .projects-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 16px;
-            }
-
-            h1 {
-                font-size: 26px;
-            }
-        }
-
-        @media screen and (max-width: 480px) {
-            .projects-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-
-            h1 {
-                font-size: 22px;
-                margin-bottom: 30px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 
 <body>
-    <div class="page-container">
-        <a href="/" class="back-link">&larr; Back</a>
-        <h1>Projects</h1>
+    <a class="skip-link" href="#content">Skip to content</a>
 
-        <div class="projects-grid">
-
-            <!-- <a href="/projects/long-arithmetic-tensorcores.html" class="project-card">
-                <div class="project-image">
-                    <img src="/projects/long_arithmetic_tensorcores/preview.png" alt="Long Arithmetic TensorCores">
-                </div>
-                <div class="project-content">
-                    <div class="project-title">Accelerating Long Arithmetic with TensorCores</div>
-                    <div class="project-description">Repurposing GPU TensorCore matrix engines for high-throughput
-                        multi-limb integer arithmetic</div>
-                    <div class="project-year">Apr 2026 — WIP</div>
-                </div>
-            </a> -->
-
-            <a href="/projects/paperviewer.html" class="project-card">
-                <div class="project-image">
-                    <img src="/projects/paperviewer/preview.png" alt="Paper Viewer">
-                </div>
-                <div class="project-content">
-                    <div class="project-title">Cutting Through the Noise - Automated AI Paper Curation</div>
-                    <div class="project-description">Automated AI Paper Curation with Language Models and RLHF</div>
-                    <div class="project-year">Jan 2025</div>
-                </div>
-            </a>
-
-            <!-- Add more project cards here -->
+    <header class="site-nav">
+        <nav class="nav-pill" aria-label="Primary">
+            <a class="nav-home" href="/">David Blum</a>
+            <ul class="nav-links">
+                <li><a href="/projects.html" aria-current="page">Work</a></li>
+                <li><a href="/logs.html">Logs</a></li>
+                <li><a href="/#about">About</a></li>
+            </ul>
+            <button class="icon-btn theme-toggle" type="button" aria-label="Switch between light and dark theme">
+                <svg class="icon icon-sun" aria-hidden="true"><use href="/img/icons.svg#sun" /></svg>
+                <svg class="icon icon-moon" aria-hidden="true"><use href="/img/icons.svg#moon" /></svg>
+            </button>
+            <button class="icon-btn nav-burger" type="button" aria-expanded="false" aria-controls="nav-overlay"
+                aria-label="Open menu"><span></span><span></span></button>
+        </nav>
+        <div class="nav-overlay" id="nav-overlay">
+            <ul>
+                <li><a href="/projects.html"><span class="eyebrow">01</span>Work</a></li>
+                <li><a href="/logs.html"><span class="eyebrow">02</span>Logs</a></li>
+                <li><a href="/#about"><span class="eyebrow">03</span>About</a></li>
+            </ul>
         </div>
-    </div>
+    </header>
+
+    <main id="content">
+        <div class="wrap">
+            <div class="page-head">
+                <p class="eyebrow" data-reveal>§ Work</p>
+                <h1 data-reveal style="--delay: 80ms">Projects</h1>
+                <p data-reveal style="--delay: 160ms">Longer write ups of things I built, with the models, numbers and
+                    dead ends that went into them.</p>
+            </div>
+
+            <div class="projects">
+                <!-- <a href="/projects/long-arithmetic-tensorcores.html" class="project" data-reveal>
+                    <figure class="plate">
+                        <span class="plate-label">Pl. II</span>
+                        <div class="plate-inner">
+                            <img src="/projects/long_arithmetic_tensorcores/preview.webp" loading="lazy"
+                                alt="Engraving of a hand moving beads on a wooden abacus">
+                        </div>
+                    </figure>
+                    <div class="project-meta">
+                        <span class="eyebrow">Apr 2026 · In progress</span>
+                        <h2 class="h3">Accelerating long arithmetic with TensorCores</h2>
+                        <p>Repurposing GPU TensorCore matrix engines for high throughput multi limb integer
+                            arithmetic.</p>
+                        <ul class="tags">
+                            <li class="tag">CUDA</li>
+                            <li class="tag">TensorCores</li>
+                            <li class="tag">Arithmetic</li>
+                        </ul>
+                        <span class="link-arrow">Read the write up
+                            <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                        </span>
+                    </div>
+                </a> -->
+
+                <a href="/projects/paperviewer.html" class="project" data-reveal>
+                    <figure class="plate">
+                        <span class="plate-label">Pl. I</span>
+                        <div class="plate-inner">
+                            <img src="/projects/paperviewer/preview.webp"
+                                alt="Engraving of giant shears cutting through a cloud of letters beside a cart of sealed parcels">
+                        </div>
+                    </figure>
+                    <div class="project-meta">
+                        <span class="eyebrow">Jan 2025</span>
+                        <h2 class="h3">Cutting through the noise</h2>
+                        <p>Automated AI paper curation. A fine tuned classifier, a generative model that invents
+                            papers to probe my taste, and RLHF to close the loop, so only the relevant work reaches my
+                            reading list.</p>
+                        <ul class="tags">
+                            <li class="tag">LLMs</li>
+                            <li class="tag">RLHF</li>
+                            <li class="tag">Classification</li>
+                        </ul>
+                        <span class="link-arrow">Read the write up
+                            <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-up-right" /></svg>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="fleuron" aria-hidden="true">
+                <svg viewBox="0 0 40 12"><path d="M20 1l5 5-5 5-5-5z" /><path d="M20 4l2 2-2 2-2-2z" fill="currentColor" /></svg>
+            </div>
+            <div class="footer-row">
+                <div class="footer-brand">
+                    <span>© <span data-year>2026</span> David Blum · No cookies, no tracking</span>
+                </div>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/davencyw"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#github-logo" /></svg>GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/davencyw/"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#linkedin-logo" /></svg>LinkedIn</a></li>
+                    <li><a href="mailto:david@schmidig.net"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#envelope-simple" /></svg>Email</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/site.js" defer></script>
 </body>
 
 </html>

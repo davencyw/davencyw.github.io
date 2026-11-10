@@ -4,96 +4,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cutting Through the Noise: Automating AI Paper Review with Language Models</title>
-    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>Cutting Through the Noise: Automating AI Paper Review with Language Models · David Blum</title>
+    <meta name="description" content="Automated AI paper curation with a fine tuned classifier, generative paper creation and RLHF.">
+    <meta property="og:title" content="Cutting Through the Noise: Automating AI Paper Review with Language Models · David Blum">
+    <meta property="og:description" content="Automated AI paper curation with a fine tuned classifier, generative paper creation and RLHF.">
+    <meta property="og:image" content="https://www.davencyw.net/og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#F2EEE5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#131209" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
-    <!-- syntax highlighting -->
-    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
-    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-python.min.js"></script>
-
-    <style>
-        #dark-mode-toggle {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 10px 15px;
-            background-color: #e0e0e0;
-            color: #333;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1000;
-        }
-
-        .banner {
-            background-color: #fff8dc;
-            color: #000;
-            padding: 10px 20px;
-            text-align: center;
-            font-weight: bold;
-            border-bottom: 2px solid #ffd700;
-        }
-
-        .full-width-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            background-color: #fff8dc;
-            color: #000;
-            padding: 10px 0;
-            text-align: center;
-            font-weight: bold;
-            border-bottom: 2px solid #ffd700;
-            z-index: 1000;
-        }
-
-        body:has(.full-width-banner) header {
-            margin-top: 60px;
-        }
-
-        body:has(.full-width-banner) #dark-mode-toggle {
-            margin-top: 60px;
-        }
-    </style>
-</head>
-
-
-
-<body>
-    <!-- <div class="full-width-banner">
-        This article is a <i>Work in Progress</i>. Content may be incomplete or subject to change.
-    </div> -->
-
-
-    <button id="dark-mode-toggle">Dark Mode</button>
     <script>
-        const toggleButton = document.querySelector("#dark-mode-toggle");
-        toggleButton.style.backgroundColor = "#e0e0e0";
-        toggleButton.style.color = "#333";
-
-        toggleButton.addEventListener('click', () => {
-            document.body.classList.toggle("latex-dark");
-            if (toggleButton.textContent == "Dark Mode") {
-                toggleButton.textContent = "Light Mode";
-                toggleButton.style.backgroundColor = "#565656";
-                toggleButton.style.color = "white";
-            } else {
-                toggleButton.textContent = "Dark Mode";
-                toggleButton.style.backgroundColor = "#e0e0e0";
-                toggleButton.style.color = "#333";
-            }
-        });
+        (function () {
+            var d = document.documentElement, t = null;
+            try { t = localStorage.getItem('theme'); } catch (e) { }
+            if (t) d.setAttribute('data-theme', t);
+            d.setAttribute('data-theme-effective', t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+            d.classList.add('js');
+        })();
     </script>
 
-    <header>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/article.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body class="article">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="site-nav">
+        <nav class="nav-pill" aria-label="Primary">
+            <a class="nav-home" href="/">David Blum</a>
+            <ul class="nav-links">
+                <li><a href="/projects.html" aria-current="true">Work</a></li>
+                <li><a href="/logs.html">Logs</a></li>
+                <li><a href="/#about">About</a></li>
+            </ul>
+            <button class="icon-btn theme-toggle" type="button" aria-label="Switch between light and dark theme">
+                <svg class="icon icon-sun" aria-hidden="true"><use href="/img/icons.svg#sun" /></svg>
+                <svg class="icon icon-moon" aria-hidden="true"><use href="/img/icons.svg#moon" /></svg>
+            </button>
+            <button class="icon-btn nav-burger" type="button" aria-expanded="false" aria-controls="nav-overlay"
+                aria-label="Open menu"><span></span><span></span></button>
+        </nav>
+        <div class="nav-overlay" id="nav-overlay">
+            <ul>
+                <li><a href="/projects.html"><span class="eyebrow">01</span>Work</a></li>
+                <li><a href="/logs.html"><span class="eyebrow">02</span>Logs</a></li>
+                <li><a href="/#about"><span class="eyebrow">03</span>About</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="article-wrap">
+        <div class="crumb-row"><a class="link-arrow" href="/projects.html"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-left" /></svg>All projects</a></div>
+        <!-- <div class="full-width-banner">
+            This article is a <i>Work in Progress</i>. Content may be incomplete or subject to change.
+        </div> -->
+
+    <header id="content">
         <h1>Cutting Through the Noise: Automated AI Paper Curation with Language Models and RLHF</h1>
     </header>
 
 
-    <p class="author">David Blum <br> January, 2025</p>
+    <p class="author">David Blum · January 2025</p>
 
     <div class="abstract">
         <h2>Abstract</h2>
@@ -501,4 +481,27 @@ DiffusionFormer: Boosting Vision Transformers with Diffusion Transformers
             <h2>Appendix A</h2>
         </article> -->
     </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="fleuron" aria-hidden="true">
+                <svg viewBox="0 0 40 12"><path d="M20 1l5 5-5 5-5-5z" /><path d="M20 4l2 2-2 2-2-2z" fill="currentColor" /></svg>
+            </div>
+            <div class="footer-row">
+                <div class="footer-brand">
+                    <span>© <span data-year>2026</span> David Blum · No cookies, no tracking</span>
+                </div>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/davencyw"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#github-logo" /></svg>GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/davencyw/"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#linkedin-logo" /></svg>LinkedIn</a></li>
+                    <li><a href="mailto:david@schmidig.net"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#envelope-simple" /></svg>Email</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/site.js" defer></script>
 </body>
+
+</html>

@@ -4,61 +4,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Is Cheap Now. Engineering Isn't.</title>
-    <link rel="stylesheet" href="https://latex.vercel.app/style.css">
-    <link rel="stylesheet" href="https://latex.vercel.app/prism/prism.css">
+    <title>Code Is Cheap Now. Engineering Isn't. · David Blum</title>
+    <meta name="description" content="AI made code generation trivial. The real work moved to architecture, judgment and turning ideas into reliable systems.">
+    <meta property="og:title" content="Code Is Cheap Now. Engineering Isn't. · David Blum">
+    <meta property="og:description" content="AI made code generation trivial. The real work moved to architecture, judgment and turning ideas into reliable systems.">
+    <meta property="og:image" content="https://www.davencyw.net/og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#F2EEE5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#131209" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
-    <style>
-        #dark-mode-toggle {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 10px 15px;
-            background-color: #565656;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1000;
-        }
-
-        .tag {
-            display: inline-block;
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            background-color: rgba(100, 100, 100, 0.3);
-            margin-right: 6px;
-            margin-bottom: 6px;
-        }
-
-        .tags {
-            margin-top: 10px;
-        }
-    </style>
-</head>
-
-<body class="latex-dark">
-    <button id="dark-mode-toggle">Light Mode</button>
     <script>
-        const toggleButton = document.querySelector("#dark-mode-toggle");
-        toggleButton.addEventListener('click', () => {
-            document.body.classList.toggle("latex-dark");
-            if (toggleButton.textContent == "Light Mode") {
-                toggleButton.textContent = "Dark Mode";
-                toggleButton.style.backgroundColor = "#e0e0e0";
-                toggleButton.style.color = "#333";
-            } else {
-                toggleButton.textContent = "Light Mode";
-                toggleButton.style.backgroundColor = "#565656";
-                toggleButton.style.color = "white";
-            }
-        });
+        (function () {
+            var d = document.documentElement, t = null;
+            try { t = localStorage.getItem('theme'); } catch (e) { }
+            if (t) d.setAttribute('data-theme', t);
+            d.setAttribute('data-theme-effective', t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+            d.classList.add('js');
+        })();
     </script>
 
-    <header>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/article.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+</head>
+
+<body class="article">
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="site-nav">
+        <nav class="nav-pill" aria-label="Primary">
+            <a class="nav-home" href="/">David Blum</a>
+            <ul class="nav-links">
+                <li><a href="/projects.html">Work</a></li>
+                <li><a href="/logs.html" aria-current="true">Logs</a></li>
+                <li><a href="/#about">About</a></li>
+            </ul>
+            <button class="icon-btn theme-toggle" type="button" aria-label="Switch between light and dark theme">
+                <svg class="icon icon-sun" aria-hidden="true"><use href="/img/icons.svg#sun" /></svg>
+                <svg class="icon icon-moon" aria-hidden="true"><use href="/img/icons.svg#moon" /></svg>
+            </button>
+            <button class="icon-btn nav-burger" type="button" aria-expanded="false" aria-controls="nav-overlay"
+                aria-label="Open menu"><span></span><span></span></button>
+        </nav>
+        <div class="nav-overlay" id="nav-overlay">
+            <ul>
+                <li><a href="/projects.html"><span class="eyebrow">01</span>Work</a></li>
+                <li><a href="/logs.html"><span class="eyebrow">02</span>Logs</a></li>
+                <li><a href="/#about"><span class="eyebrow">03</span>About</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="article-wrap">
+        <div class="crumb-row"><a class="link-arrow" href="/logs.html"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow-left" /></svg>All technical logs</a></div>
+    <header id="content">
         <h1>Code Is Cheap Now. Engineering Isn't.</h1>
-        <p class="author">Technical Log - February 2026</p>
+        <p class="author">Technical log · February 2026</p>
         <div class="tags">
             <span class="tag">Development</span>
             <span class="tag">Tools</span>
@@ -163,6 +170,27 @@
             </p>
         </article>
     </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="fleuron" aria-hidden="true">
+                <svg viewBox="0 0 40 12"><path d="M20 1l5 5-5 5-5-5z" /><path d="M20 4l2 2-2 2-2-2z" fill="currentColor" /></svg>
+            </div>
+            <div class="footer-row">
+                <div class="footer-brand">
+                    <span>© <span data-year>2026</span> David Blum · No cookies, no tracking</span>
+                </div>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/davencyw"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#github-logo" /></svg>GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/davencyw/"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#linkedin-logo" /></svg>LinkedIn</a></li>
+                    <li><a href="mailto:david@schmidig.net"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#envelope-simple" /></svg>Email</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/site.js" defer></script>
 </body>
 
 </html>
